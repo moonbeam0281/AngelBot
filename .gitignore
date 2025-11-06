@@ -17,6 +17,7 @@ obj/
 *.pdb
 *.cache
 *.log
+*.sln
 
 # OS junk
 Thumbs.db
