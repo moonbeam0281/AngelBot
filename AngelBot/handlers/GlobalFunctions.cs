@@ -16,7 +16,7 @@ namespace AngelBot.Handlers
 
         public static string[] Lex(string s)
         {
-            if (string.IsNullOrWhiteSpace(s)) return Array.Empty<string>();
+            if (string.IsNullOrWhiteSpace(s)) return [];
 
             bool inQuotes = false;
             var current = new List<char>();

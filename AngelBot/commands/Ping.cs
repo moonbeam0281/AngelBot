@@ -10,6 +10,8 @@ namespace AngelBot.Commands
 
         }
 
+        public override SlashScope Scope => SlashScope.Global;
+
         public override EmbedBuilder HelpString()
             => new()
             {
@@ -22,9 +24,10 @@ namespace AngelBot.Commands
                 ]
             };
 
-        public override Task Run(SocketMessage message, DiscordSocketClient client, string usedPrefix, string[] args)
+        public override Task Run(SocketMessage message, DiscordSocketClient client, string usedPrefix, string usedCommandName, string[] args)
         {
-            message.Channel.SendMessageAsync($":ping_pong: P{usedPrefix[1]}ng! : **{client.Latency}**ms");
+            var pingpong = usedCommandName[1] == 'i' ? 'o' : 'i';
+            message.Channel.SendMessageAsync($":ping_pong: P{pingpong}ng! : **{client.Latency}**ms");
 
             return Task.CompletedTask;
         }
@@ -38,7 +41,8 @@ namespace AngelBot.Commands
 
         public override async Task Run(SocketSlashCommand interaction, DiscordSocketClient client)
         {
-            await interaction.RespondAsync($":ping_pong: P{interaction.CommandName[1]}ng! : **{client.Latency}**ms");
+            var pingpong = interaction.CommandName[1] == 'i' ? 'o' : 'i';
+            await interaction.RespondAsync($":ping_pong: P{pingpong}ng! : **{client.Latency}**ms");
         }
     }
 }

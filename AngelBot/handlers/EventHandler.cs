@@ -1,3 +1,4 @@
+using System.Security.Authentication;
 using AngelBot.Interfaces;
 using Discord;
 using Discord.WebSocket;
@@ -25,6 +26,7 @@ namespace AngelBot.Handlers
 
             client.MessageReceived += MessageReceived;
             client.SlashCommandExecuted += SlashCommandExecuted;
+
 
         }
 
@@ -84,6 +86,7 @@ namespace AngelBot.Handlers
 
         private async Task LoadSlashCommands()
         {
+            /*
             var slashBuilders = CommandList.OfType<ICommand>()
                 .Select(c => (cmd: c, builder: c.BuildSlash()))
                 .Where(x => x.builder is not null)
@@ -101,18 +104,21 @@ namespace AngelBot.Handlers
             var slashProps = slashBuilders
                 .Select(x => x.builder!.Build())
                 .ToArray();
+                */
+            var globalProps = CommandList.OfType<Command>().Where(c => c.Scope == SlashScope.Global)
+            .Select(c => c.BuildSlash()).Where(b => b is not null).Select(b => b!.Build()).ToArray();
 
-            foreach(var x in slashProps)
-            {
-                Console.WriteLine($"Slash command: {x.Name}");
-            }
+            var guildProps = CommandList.OfType<Command>().Where(c => c.Scope == SlashScope.Guild)
+            .Select(c => c.BuildSlash()).Where(c => c is not null).Select(b => b!.Build()).ToArray();
+
             try
             {
-                //await _mainClient.BulkOverwriteGlobalApplicationCommandsAsync([]);
+                await _mainClient.BulkOverwriteGlobalApplicationCommandsAsync(globalProps);
+                foreach (var x in globalProps) Console.WriteLine($"[Slash] Registered {x.Name} to global slash commands...");
                 foreach (var guild in _mainClient.Guilds)
                 {
-                    await _mainClient.Rest.BulkOverwriteGuildCommands(slashProps, guild.Id);
-                    Console.WriteLine($"[Slash] Registered {slashProps.Length} commands in guild {guild.Name} ({guild.Id})");
+                    await _mainClient.Rest.BulkOverwriteGuildCommands(guildProps, guild.Id);
+                    Console.WriteLine($"[Slash] Registered {guildProps.Length} commands in guild {guild.Name} ({guild.Id})");
                 }
 
             }
@@ -134,19 +140,15 @@ namespace AngelBot.Handlers
             }
             await Task.CompletedTask;
         }
-
+        //Base Message reciever
         private async Task MessageReceived(SocketMessage message)
         {
             try
             {
-                if (message.Author.Id == 502122734437007360 || message.Author.IsBot) return;
+                if (message.Author.IsBot) return;
 
                 var used = basePrefixes.FirstOrDefault(p => message.Content.StartsWith(p, StringComparison.OrdinalIgnoreCase));
                 if (used is null) return;
-
-                var server = (message.Channel as SocketGuildChannel)?.Guild;
-
-                if (server == null && message.Channel is not SocketDMChannel) return;
 
                 var tokens = GlobalFunctions.Lex(message.Content[used.Length..].Trim());
                 if (tokens.Length == 0) return;
@@ -158,7 +160,7 @@ namespace AngelBot.Handlers
 
                 if (match is null) return;
 
-                await match.Run(message, _mainClient, used, args);
+                await match.Run(message, _mainClient, used, name, args);
             }
             catch (Exception e)
             {
