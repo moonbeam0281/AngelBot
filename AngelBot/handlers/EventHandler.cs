@@ -1,12 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 using AngelBot.Interfaces;
 using Discord;
 using Discord.WebSocket;
-using Microsoft.VisualBasic;
 
 namespace AngelBot.Handlers
 {
@@ -30,6 +24,8 @@ namespace AngelBot.Handlers
             client.Ready += OnReady;
 
             client.MessageReceived += MessageReceived;
+            client.SlashCommandExecuted += SlashCommandExecuted;
+
         }
 
         private async Task OnReady()
@@ -43,6 +39,8 @@ namespace AngelBot.Handlers
             Console.WriteLine($"Added prefixes to bot: {basePrefixes.Aggregate("", (a, b) => { return $"{a}, {b}"; })}");
 
             LoadCommands();
+
+            await LoadSlashCommands();
 
             await Log(new LogMessage(LogSeverity.Info, "Ready",
             $"Logged in as {_mainClient.CurrentUser} | prefixes: {string.Join(", ", basePrefixes)}"));
@@ -71,7 +69,7 @@ namespace AngelBot.Handlers
             {
                 try
                 {
-                    Console.WriteLine($"Added new command {command.Name}");
+                    Console.WriteLine($"Added new command: {command.Name}");
                     newList.Add((ICommand)Activator.CreateInstance(command)!);
                 }
                 catch (Exception e)
@@ -82,6 +80,46 @@ namespace AngelBot.Handlers
 
 
             CommandList = [.. newList];
+        }
+
+        private async Task LoadSlashCommands()
+        {
+            var slashBuilders = CommandList.OfType<ICommand>()
+                .Select(c => (cmd: c, builder: c.BuildSlash()))
+                .Where(x => x.builder is not null)
+                .ToArray();
+            
+            var dupes = slashBuilders
+                .GroupBy(x => x.builder!.Name)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key)
+                .ToArray();
+
+            if (dupes.Length > 0)
+                Console.WriteLine($"[Slash] Duplicate names: {string.Join(", ", dupes)}");
+
+            var slashProps = slashBuilders
+                .Select(x => x.builder!.Build())
+                .ToArray();
+
+            foreach(var x in slashProps)
+            {
+                Console.WriteLine($"Slash command: {x.Name}");
+            }
+            try
+            {
+                //await _mainClient.BulkOverwriteGlobalApplicationCommandsAsync([]);
+                foreach (var guild in _mainClient.Guilds)
+                {
+                    await _mainClient.Rest.BulkOverwriteGuildCommands(slashProps, guild.Id);
+                    Console.WriteLine($"[Slash] Registered {slashProps.Length} commands in guild {guild.Name} ({guild.Id})");
+                }
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"{e}");
+            }
         }
 
         //Event tasks below
@@ -116,18 +154,42 @@ namespace AngelBot.Handlers
                 var name = tokens[0].ToLowerInvariant();
                 var args = tokens.Skip(1).ToArray();
 
-                var match = CommandList.OfType<Command>()
-                .FirstOrDefault(c => c.Names.Any(n => n.Equals(name, StringComparison.OrdinalIgnoreCase)));
+                var match = GetMatchingCommand(name);
 
                 if (match is null) return;
 
-                await match.Run(message, _mainClient, name, args);
+                await match.Run(message, _mainClient, used, args);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
             }
             await Task.CompletedTask;
+        }
+
+        private async Task SlashCommandExecuted(SocketSlashCommand interaction)
+        {
+            try
+            {
+                var name = interaction.CommandName.ToLowerInvariant();
+
+                var match = GetMatchingCommand(name);
+
+                if (match is null) await interaction.RespondAsync("Unknown command.", ephemeral: true);
+                else await match.Run(interaction, _mainClient);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error while running slash command:\n{e}");
+                await interaction.RespondAsync($"Error while running slash command: ```{e}```");
+            }
+        }
+
+        private Command? GetMatchingCommand(string name)
+        {
+            var match = CommandList.OfType<Command>().FirstOrDefault(c => c.Names.Any(n => n.Equals(name, StringComparison.OrdinalIgnoreCase)));
+            if (match is null) return null;
+            else return match;
         }
     }
 }

@@ -1,10 +1,5 @@
 using Discord;
 using Discord.WebSocket;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using AngelBot.Interfaces;
 
 namespace AngelBot.Commands
 {
@@ -19,7 +14,7 @@ namespace AngelBot.Commands
             => new()
             {
                 Title = GetType().Name,
-                Description = "Ping latency!",
+                Description = "Ping Pong latency!",
                 Color = new Color(255, 255, 128),
                 Fields =
                 [
@@ -32,6 +27,18 @@ namespace AngelBot.Commands
             message.Channel.SendMessageAsync($":ping_pong: P{usedPrefix[1]}ng! : **{client.Latency}**ms");
 
             return Task.CompletedTask;
+        }
+
+        public override SlashCommandBuilder BuildSlash()
+            => new()
+            {
+                Name = GetType().Name.ToLowerInvariant(),
+                Description = "Ping pong latency!"
+            };
+
+        public override async Task Run(SocketSlashCommand interaction, DiscordSocketClient client)
+        {
+            await interaction.RespondAsync($":ping_pong: P{interaction.CommandName[1]}ng! : **{client.Latency}**ms");
         }
     }
 }
