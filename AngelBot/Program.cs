@@ -1,4 +1,5 @@
 ﻿using AngelBot.Handlers;
+using Discord;
 using Discord.WebSocket;
 using dotenv.net;
 
@@ -7,7 +8,14 @@ namespace AngelBot
 {
     internal class Program
     {
-        private static readonly DiscordSocketConfig Config = new() { MessageCacheSize = 100 };
+        private static readonly DiscordSocketConfig Config = new()
+        {
+            MessageCacheSize = 100,
+            GatewayIntents =
+                GatewayIntents.Guilds
+                | GatewayIntents.GuildMessages
+                | GatewayIntents.MessageContent
+        };
         private static readonly DiscordSocketClient Client = new(Config);
         private static DiscordEventHadnler? _Events;
 
@@ -23,7 +31,7 @@ namespace AngelBot
                 return;
             }
             Console.WriteLine("Logging into bot using token...");
-            await Client.LoginAsync(Discord.TokenType.Bot, token);
+            await Client.LoginAsync(TokenType.Bot, token);
             Console.WriteLine("Starting up...");
             await Client.StartAsync();
             Console.WriteLine("Bot is running!");

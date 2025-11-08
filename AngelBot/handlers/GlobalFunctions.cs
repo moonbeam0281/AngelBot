@@ -1,4 +1,6 @@
 using System;
+using System.Reflection;
+using System.Reflection.Metadata.Ecma335;
 using System.Transactions;
 
 namespace AngelBot.Handlers
@@ -17,25 +19,38 @@ namespace AngelBot.Handlers
 
         public static string[] Lex(string s)
         {
-            bool insinuates = false;
-            var tokens = new List<string> { "" };
-            foreach (var c in s)
+            if (string.IsNullOrWhiteSpace(s)) return Array.Empty<string>();
+
+            bool inQuotes = false;
+            var current = new List<char>();
+            var tokens = new List<string>();
+
+            foreach (var ch in s)
             {
-                if (c == '"')
+                if (ch == '"')
                 {
-                    insinuates = !insinuates;
+                    inQuotes = !inQuotes;
+                    continue;
                 }
-                else if (char.IsWhiteSpace(c) && insinuates == false)
+
+                if (char.IsWhiteSpace(ch) && !inQuotes)
                 {
-                    tokens.Add("");
+                    if (current.Count > 0)
+                    {
+                        tokens.Add(new string(current.ToArray()));
+                        current.Clear();
+                    }
                 }
                 else
                 {
-                    tokens[tokens.Count - 1] += c;
+                    current.Add(ch);
                 }
             }
 
-            return tokens.ToArray();
+            if (current.Count > 0)
+                tokens.Add(new string(current.ToArray()));
+
+            return tokens.Where(t => !string.IsNullOrWhiteSpace(t)).ToArray();
         }
 
         public static IEnumerable<T> ClearByCondition<T>(this IEnumerable<T> list, Func<T, T, bool> condition) where T : class
@@ -54,9 +69,34 @@ namespace AngelBot.Handlers
 
         public static IEnumerable<Type> GetAllTypes<T>()
         {
+            var target = typeof(T);
+            return AppDomain.CurrentDomain.GetAssemblies().SelectMany(
+                a =>
+                {
+                    try
+                    {
+                        return a.GetTypes();
+                    }
+                    catch (ReflectionTypeLoadException ex)
+                    {
+                        return ex.Types.OfType<Type>();
+                    }
+                }
+            ).Where(t =>
+            t is not null &&
+            target.IsAssignableFrom(t) &&
+            t != target &&
+            !t.IsAbstract &&
+            !t.IsInterface &&
+            t.GetConstructor(Type.EmptyTypes) != null);
+        }
+
+        /*
+        public static IEnumerable<Type> GetAllTypes<T>()
+        {
             var types = AppDomain.CurrentDomain.GetAssemblies().SelectMany(s => s.GetTypes())
                 .Where(p => typeof(T).IsAssignableFrom(p) && p != typeof(T));
             return types;
-        }
+        }*/
     }
 }

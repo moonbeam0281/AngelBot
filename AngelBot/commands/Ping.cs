@@ -8,30 +8,30 @@ using AngelBot.Interfaces;
 
 namespace AngelBot.Commands
 {
-    class Ping : Command, ICommand
+    class Ping : Command
     {
         public Ping() : base("ping", "pong")
         {
 
         }
 
-        public event EventHandler? CanExecuteChanged;
-
         public override EmbedBuilder HelpString()
-            => new EmbedBuilder
+            => new()
             {
                 Title = GetType().Name,
                 Description = "Ping latency!",
                 Color = new Color(255, 255, 128),
-                Fields = new List<EmbedFieldBuilder>
-                {
+                Fields =
+                [
                     new EmbedFieldBuilder{Name = "I will display my ping latency!", Value = "```a!ping/pong```"}
-                }
+                ]
             };
 
-        public void Run(SocketMessage message, DiscordSocketClient client, string prefix)
+        public override Task Run(SocketMessage message, DiscordSocketClient client, string usedPrefix, string[] args)
         {
-            message.Channel.SendMessageAsync($":ping_pong: P{prefix[1]}ng! : **{client.Latency}**ms");
+            message.Channel.SendMessageAsync($":ping_pong: P{usedPrefix[1]}ng! : **{client.Latency}**ms");
+
+            return Task.CompletedTask;
         }
     }
 }

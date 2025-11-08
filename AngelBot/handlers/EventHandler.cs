@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AngelBot.Interfaces;
 using Discord;
 using Discord.WebSocket;
+using Microsoft.VisualBasic;
 
 namespace AngelBot.Handlers
 {
@@ -17,51 +18,69 @@ namespace AngelBot.Handlers
         private readonly List<string> basePrefixes =
         [
             "angel",
-            "a!",
-            "<@502122734437007360>",
-            "<@!502122734437007360>"
+            "a!"
         ];
-        internal static readonly object OutputLogLock = new object();
+        internal static readonly object OutputLogLock = new();
 
         public DiscordEventHadnler(DiscordSocketClient client)
         {
-            LoadCommands();
             _mainClient = client;
 
             client.Log += Log;
+            client.Ready += OnReady;
 
+            client.MessageReceived += MessageReceived;
         }
 
-        private async void ExecuteCommand(SocketMessage message, string commandPrefix)
+        private async Task OnReady()
         {
-            foreach (var v in CommandList.Where(v => v is Command c && c.Names.Contains(commandPrefix.ToLower())))
-            {
-                if (v is not Command c) break;
-                var x = new Stopwatch();
-                x.Start();
-                try
-                {
-                    v.Run(message, _mainClient, commandPrefix);
-                }
-                catch (Exception e)
-                {
-                    await Log(new LogMessage(LogSeverity.Critical, "Executer", $"ERROR {e.Message}!", e));
-                }
-                finally
-                {
-                    x.Stop();
-                    if (!c.Names.Contains("any"))
-                        await Log(new LogMessage(LogSeverity.Info, "Executer", $"{c.GetType().Name} executed in {(message.Channel as SocketGuildChannel)?.Guild.Name}, by {message.Author.Username}, done in  {x.ElapsedMilliseconds}ms..."));
+            var mention = $"<@{_mainClient.CurrentUser.Id}>";
+            var mentionNick = $"<@!{_mainClient.CurrentUser.Id}>";
 
-                }
-            }
+            if (!basePrefixes.Contains(mention)) basePrefixes.Add(mention);
+            if (!basePrefixes.Contains(mentionNick)) basePrefixes.Add(mentionNick);
+
+            Console.WriteLine($"Added prefixes to bot: {basePrefixes.Aggregate("", (a, b) => { return $"{a}, {b}"; })}");
+
+            LoadCommands();
+
+            await Log(new LogMessage(LogSeverity.Info, "Ready",
+            $"Logged in as {_mainClient.CurrentUser} | prefixes: {string.Join(", ", basePrefixes)}"));
+
+            await Task.CompletedTask;
         }
 
         private void LoadCommands()
         {
             var newList = new List<ICommand>();
-            GlobalFunctions.GetAllTypes<ICommand>().ToList().ForEach(command => newList.Add((ICommand)Activator.CreateInstance(command)));
-            GlobalFunctions.GetAllTypes<IPreLoad>().ToList().ForEach(command => ((IPreLoad)Activator.CreateInstance(command)).PreLoad(_mainClient));
+
+            GlobalFunctions.GetAllTypes<IPreLoad>().ToList().ForEach(command =>
+            {
+                try
+                {
+                    Console.WriteLine($"Loaded {command.Name} and ran preload...");
+                    ((IPreLoad)Activator.CreateInstance(command)!).PreLoad(_mainClient);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Error while running...\n{e}");
+                }
+            });
+
+            GlobalFunctions.GetAllTypes<ICommand>().ToList().ForEach(command =>
+            {
+                try
+                {
+                    Console.WriteLine($"Added new command {command.Name}");
+                    newList.Add((ICommand)Activator.CreateInstance(command)!);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Error while loading...\n{e}");
+                }
+            });
+
+
             CommandList = [.. newList];
         }
 
@@ -72,11 +91,7 @@ namespace AngelBot.Handlers
             Console.WriteLine(message.ToString());
             lock (OutputLogLock)
             {
-                if (OutputLog.Count > 200)
-                {
-                    OutputLog.RemoveAt(0);
-                }
-
+                if (OutputLog.Count > 200) OutputLog.RemoveAt(0);
                 OutputLog.Add(message);
             }
             await Task.CompletedTask;
@@ -86,16 +101,27 @@ namespace AngelBot.Handlers
         {
             try
             {
-                if (message.Author.Id == 502122734437007360) return;
+                if (message.Author.Id == 502122734437007360 || message.Author.IsBot) return;
+
+                var used = basePrefixes.FirstOrDefault(p => message.Content.StartsWith(p, StringComparison.OrdinalIgnoreCase));
+                if (used is null) return;
+
                 var server = (message.Channel as SocketGuildChannel)?.Guild;
 
                 if (server == null && message.Channel is not SocketDMChannel) return;
 
-                var args = GlobalFunctions.Lex(message.Content);
-                args = [.. args.Where(x => !string.IsNullOrEmpty(x))];
+                var tokens = GlobalFunctions.Lex(message.Content[used.Length..].Trim());
+                if (tokens.Length == 0) return;
 
-                //stuck here
+                var name = tokens[0].ToLowerInvariant();
+                var args = tokens.Skip(1).ToArray();
 
+                var match = CommandList.OfType<Command>()
+                .FirstOrDefault(c => c.Names.Any(n => n.Equals(name, StringComparison.OrdinalIgnoreCase)));
+
+                if (match is null) return;
+
+                await match.Run(message, _mainClient, name, args);
             }
             catch (Exception e)
             {

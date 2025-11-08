@@ -4,6 +4,7 @@ namespace AngelBot.Interfaces
 {
     interface ICommand
     {
-        void Run(SocketMessage message, DiscordSocketClient client, string prefix);
+        IReadOnlyCollection<string> Names { get; }
+        Task Run(SocketMessage message, DiscordSocketClient client, string usedPrefix, string[] args);
     }
 }

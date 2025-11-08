@@ -2,8 +2,8 @@ using Discord.WebSocket;
 
 namespace AngelBot.Interfaces
 {
-    interface IPreLoad
+    public interface IPreLoad
     {
-        void PreLoad(DiscordSocketClient client);
+        Task PreLoad(DiscordSocketClient client);
     }
 }
