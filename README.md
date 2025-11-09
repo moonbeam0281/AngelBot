@@ -18,61 +18,44 @@ The bot architecture is designed for easy expansion — just add new command cla
 - Beautiful **embed-based help system**
 - Cross-context execution (`SocketMessage` / `SocketInteraction`)
 
----
-
-## 🧩 Dependencies
-
-| Dependency | Version | Description |
-|-------------|----------|--------------|
-| [.NET SDK](https://dotnet.microsoft.com/en-us/download) | 8.0+ | Required runtime |
-| [Discord.NET](https://github.com/discord-net/Discord.Net) | 3.x | Discord API wrapper |
-| [dotenv.net](https://github.com/tonerdo/dotenv) | latest | Loads `.env` variables |
-| System.Linq / Reflection | built-in | Command auto-loading |
-| Discord token | — | Required in `.env` |
 
 ---
 
-## ⚙️ Installation
+# ⚙️ Setup Guide
 
-### 1️⃣ Clone the repository
+AngelBot is split into **two main parts**:
 
-If you’ve set up SSH (recommended):
-```bash
-git clone git@github.com:YourUser/AngelBot.git
-```
-
-Or with HTTPS:
-```bash
-git clone https://github.com/YourUser/AngelBot.git
-```
-
-Then enter the folder:
-```bash
-cd AngelBot
-```
+1. **AngelBot (C# Discord backend)** — runs the Discord bot.
+2. **AngelDashboard (React frontend)** — manages and monitors the bot via a web dashboard.
 
 ---
 
-### 2️⃣ Restore dependencies
+## 🪄 1️⃣ AngelBot Setup (C# Backend)
+
+### 📦 Requirements
+| Dependency | Version | Purpose |
+|-------------|----------|----------|
+| [.NET SDK](https://dotnet.microsoft.com/en-us/download) | 9.0+ | Required runtime |
+| [Discord.NET](https://github.com/discord-net/Discord.Net) | 3.x | Discord API library |
+| [dotenv.net](https://github.com/tonerdo/dotenv) | latest | Load environment variables |
+
+---
+
+### 🧩 Steps
+
+#### 1. Restore dependencies
 ```bash
 dotnet restore
 ```
 
----
-
-### 3️⃣ Create a `.env` file
-
-Create a file named `.env` in the project root (same folder as `.csproj`):
+#### 2. Create a `.env` file
+In the project root:
 ```
 DISCORD_TOKEN=your_bot_token_here
 PREFIX=a!
 ```
 
-> 📝 The `.env` file is ignored by Git — keep your token safe!
-
----
-
-### 4️⃣ Build & run the bot
+#### 3. Build & run
 ```bash
 dotnet build
 dotnet run
@@ -83,132 +66,97 @@ If successful, you’ll see:
 ✅ Logged in as AngelBot#1234
 ```
 
+#### 4. (Optional) Development mode
+Use:
+```bash
+dotnet watch run
+```
+This automatically restarts the bot when you change code.
+
 ---
 
-## 📂 Folder Structure
+## 🌐 2️⃣ AngelDashboard Setup (React Frontend)
 
-```
-AngelBot/
-│
-├── Classes/
-│   └── Command.cs                 # Base command class
-│
-├── Commands/
-│   ├── Help.cs                    # Help command
-│   ├── Ping.cs                    # Example command
-│
-├── Handlers/
-│   ├── EventHandler.cs            # Registers commands and events
-│   ├── ReactionHandler.cs         # Handles reactions
-│   └── ListingBuilder.cs          # Paginated embed listings
-│
-├── Interfaces/
-│   ├── ICommand.cs                # Base command interface
-│   └── IPreLoad.cs                # (optional) pre-load logic
-│
-├── .env                           # Environment variables (ignored by Git)
-├── .env.example                   # Example environment template
-├── AngelBot.csproj                # Project file
-└── Program.cs                     # Main entry point
+### 📦 Requirements
+| Dependency | Version | Purpose |
+|-------------|----------|----------|
+| [Node.js](https://nodejs.org/en/download) | 22.12+ (or 20.19+) | Required for Vite |
+| [npm](https://www.npmjs.com/) | 10.x | Package manager |
+| [Vite](https://vitejs.dev/) | latest | Frontend bundler |
+
+---
+
+### 🧩 Steps
+
+#### 1. Move into dashboard folder
+```bash
+cd angeldashboard
 ```
 
----
-
-## 🧠 Command System
-
-Each command inherits from `Command` and defines its name, description, and run logic.  
-Example:
-
-```csharp
-class Ping : Command
-{
-    public Ping() : base("ping") { }
-
-    public override EmbedBuilder HelpString()
-        => new EmbedBuilder()
-           .WithTitle("Ping Command")
-           .WithDescription("Replies with 'Pong!'");
-
-    public override async Task Run(SocketMessage msg, DiscordSocketClient client, string prefix, string cmd, string[] args)
-        => await msg.Channel.SendMessageAsync("Pong!");
-}
+#### 2. Restore dependencies
+```bash
+npm install
 ```
 
-To add a new command:
-1. Create a `.cs` file in `/Commands/`
-2. Inherit from `Command`
-3. Define `HelpString()` and `Run()`
-4. Done! It auto-registers on startup.
-
----
-
-## 🎮 Reaction & Listing System
-
-### ReactionHandler
-Attach callbacks to emoji reactions on messages:
-```csharp
-await message.AddReactionHandler(emoji, user => {
-    Console.WriteLine($"{user.Username} reacted!");
-}, TimeSpan.FromMinutes(5));
+If you previously used Yarn:
+```bash
+yarn install
 ```
 
-### ListingBuilder
-Easily create paginated embed lists:
-```csharp
-var builder = new ListingBuilder<string>(
-    list: myItems,
-    redraw: (pageItems, info) => new EmbedBuilder()
-        .WithTitle($"Page {info.Current}")
-        .WithDescription(string.Join("\n", pageItems))
-        .Build()
-);
-await builder.SendAsync(channel);
+#### 3. Create `.env`
+If your dashboard communicates with the bot’s API:
+```
+VITE_API_URL=http://localhost:8000
 ```
 
----
+*(You can change the port depending on your C# backend settings.)*
 
-## 🔐 Environment Variables
+#### 4. Start the development server
+```bash
+npm run dev
+```
 
-| Key | Description |
-|-----|-------------|
-| `DISCORD_TOKEN` | Your bot’s token from the Discord Developer Portal |
-| `PREFIX` | Command prefix (default: `a!`) |
+You’ll see:
+```
+VITE v5.x.x  ready in 200ms
+Local: http://localhost:5173/
+```
 
----
-
-## 💻 Running on Another Laptop
-
-1. Install **.NET SDK 8+**  
-2. Clone your repository (via SSH or HTTPS)  
-3. Run:
-   ```bash
-   dotnet restore
-   dotnet run
-   ```
-4. Add your `.env` file again (tokens aren’t stored in Git)
-5. Done ✅
+Open your browser at that address.
 
 ---
 
-## 🧰 Troubleshooting
+### 💡 Common Issues
 
-| Issue | Solution |
-|--------|-----------|
-| `CS0052` “inconsistent accessibility” | Make `ICommand` public |
-| Bot won’t start | Check your `.env` for correct token |
-| Slash commands not syncing | Ensure `await client.Rest.StartAsync()` includes your guilds |
-| Reaction events not firing | Make sure `MessageContent` intent is enabled in Discord Developer Portal |
-
----
-
-## 🪄 Developer Info
-
-- **Language:** C# (.NET 8)
-- **Framework:** Discord.NET
-- **Environment:** dotenv + reflection system
-- **Author:** Moonbeam 🌙  
-- **License:** MIT (optional — add if desired)
+| Problem | Cause | Fix |
+|----------|--------|-----|
+| `Vite requires Node.js 20.19+` | Outdated Node.js | Update Node to v22+ from [nodejs.org](https://nodejs.org/en/download) |
+| `crypto.hash is not a function` | Old Node version (v19 or lower) | Upgrade Node.js |
+| Dashboard not connecting | Wrong API URL | Check your `.env` and C# backend port |
 
 ---
 
-> “Every command carries a little bit of Angel’s light.” ✨
+## 💫 Quick Run Summary
+
+| Service | Command | Description |
+|----------|----------|-------------|
+| 🧩 AngelBot | `dotnet run` | Launches Discord backend |
+| 🌐 Dashboard | `npm run dev` | Starts frontend server |
+| 🔄 Dev Mode (bot) | `dotnet watch run` | Auto-reload C# changes |
+| ⚙️ Build Dashboard | `npm run build` | Creates production build |
+
+---
+
+## 💻 Deployment Notes
+- Keep both `.env` files out of Git (`.gitignore` already includes them).
+- When moving to another PC:
+  1. Restore .NET SDK 9.0+
+  2. Restore Node.js 22+
+  3. Clone repo
+  4. Run `dotnet restore` and `npm install` again
+  5. Add `.env` files manually
+- For production, host the dashboard build (`/dist`) on any static web host and keep the bot running as a background service.
+
+---
+
+> 🌙 *“Two halves of one system — Angel’s light guiding both code and interface.”*
