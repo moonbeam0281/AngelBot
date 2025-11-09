@@ -2,7 +2,7 @@ using AngelBot.Interfaces;
 using Discord;
 using Discord.WebSocket;
 
-namespace AngelBot
+namespace AngelBot.Classes
 {
     public enum SlashScope {None, Global, Guild}
     public abstract class Command(params string[] names) : ICommand
@@ -10,7 +10,7 @@ namespace AngelBot
         public IReadOnlyCollection<string> Names { get; } = names?.Length > 0 ?
             Array.AsReadOnly(names) :
             Array.AsReadOnly(["any"]);
-        public virtual SlashScope Scope => SlashScope.Guild;
+        public virtual SlashScope Scope => SlashScope.None;
 
         public abstract EmbedBuilder HelpString();
 

@@ -1,4 +1,6 @@
+using System.Dynamic;
 using System.Security.Authentication;
+using AngelBot.Classes;
 using AngelBot.Interfaces;
 using Discord;
 using Discord.WebSocket;
@@ -9,7 +11,7 @@ namespace AngelBot.Handlers
     {
         private readonly DiscordSocketClient _mainClient;
         internal readonly List<LogMessage> OutputLog = [];
-        internal ICommand[] CommandList = [];
+        public static ICommand[] CommandList = [];
         private readonly List<string> basePrefixes =
         [
             "angel",
@@ -27,6 +29,8 @@ namespace AngelBot.Handlers
             client.MessageReceived += MessageReceived;
             client.SlashCommandExecuted += SlashCommandExecuted;
 
+            //Add reaction event handler for reactions and listing
+            //client.ReactionAdded += Something
 
         }
 
@@ -86,25 +90,6 @@ namespace AngelBot.Handlers
 
         private async Task LoadSlashCommands()
         {
-            /*
-            var slashBuilders = CommandList.OfType<ICommand>()
-                .Select(c => (cmd: c, builder: c.BuildSlash()))
-                .Where(x => x.builder is not null)
-                .ToArray();
-            
-            var dupes = slashBuilders
-                .GroupBy(x => x.builder!.Name)
-                .Where(g => g.Count() > 1)
-                .Select(g => g.Key)
-                .ToArray();
-
-            if (dupes.Length > 0)
-                Console.WriteLine($"[Slash] Duplicate names: {string.Join(", ", dupes)}");
-
-            var slashProps = slashBuilders
-                .Select(x => x.builder!.Build())
-                .ToArray();
-                */
             var globalProps = CommandList.OfType<Command>().Where(c => c.Scope == SlashScope.Global)
             .Select(c => c.BuildSlash()).Where(b => b is not null).Select(b => b!.Build()).ToArray();
 

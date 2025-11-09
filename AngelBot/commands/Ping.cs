@@ -1,3 +1,4 @@
+using AngelBot.Classes;
 using Discord;
 using Discord.WebSocket;
 
