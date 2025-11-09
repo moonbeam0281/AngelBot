@@ -7,7 +7,7 @@ namespace AngelBot.Commands
 {
     class Help : Command
     {
-        public Help() : base("help")
+        public Help() : base("help", "commands")
         {
 
         }
