@@ -29,8 +29,7 @@ namespace AngelBot.Handlers
             client.MessageReceived += MessageReceived;
             client.SlashCommandExecuted += SlashCommandExecuted;
 
-            //Add reaction event handler for reactions and listing
-            //client.ReactionAdded += Something
+            client.ReactionAdded += ReactionAdded; 
 
         }
 
@@ -170,6 +169,14 @@ namespace AngelBot.Handlers
                 Console.WriteLine($"Error while running slash command:\n{e}");
                 await interaction.RespondAsync($"Error while running slash command: ```{e}```");
             }
+        }
+
+        private async Task ReactionAdded(Cacheable<IUserMessage, ulong> cacheableMessage, Cacheable<IMessageChannel, ulong> cacheableChannel, SocketReaction reaction)
+        {
+            if (reaction.UserId == _mainClient.CurrentUser.Id) return;
+            var user = reaction.User.IsSpecified ? reaction.User.Value : await _mainClient.GetUserAsync(reaction.UserId);
+            ReactionHandler.Invoke(cacheableMessage.Id, reaction.Emote.Name, user);
+            await Task.CompletedTask;
         }
 
         private Command? GetMatchingCommand(string name)

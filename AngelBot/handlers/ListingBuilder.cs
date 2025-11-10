@@ -1,12 +1,22 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 
 namespace AngelBot.Handlers
 {
-    public class ListingBuilder<T>(IEnumerable<T> list, Func<IEnumerable<T>, ListingBuilder<T>.LocationInformation, Embed> redraw, int time = 2, int first = 1, int disp = 10, Emote? lEmote = null, Emote? rEmote = null)
+    public class ListingBuilder<T>(
+        IEnumerable<T> list,
+        Func<IEnumerable<T>, ListingBuilder<T>.LocationInformation, Embed> redraw,
+        int time = 2,
+        int first = 1,
+        int disp = 10,
+        Emote? lEmote = null,
+        Emote? rEmote = null,
+        ulong? allowedUserId = null
+    )
     {
         public struct LocationInformation
         {
@@ -15,123 +25,99 @@ namespace AngelBot.Handlers
             public int Current { get; set; }
             public IEnumerable<T> List { get; set; }
         }
-        private readonly IEnumerable<T> _list = list;
-        private readonly int _first = first;
-        private readonly int _disp = disp;
+
+        private readonly IReadOnlyList<T> _items = list as IReadOnlyList<T> ?? list.ToList();
+        private readonly int _disp = Math.Max(1, disp);
+        private readonly int _first = Math.Max(1, first);
+        private readonly TimeSpan _timeout = TimeSpan.FromMinutes(Math.Max(1, time));
         private readonly Func<IEnumerable<T>, LocationInformation, Embed> _redraw = redraw;
-        private readonly Emoji _rightEmoji = new("▶️");
-        private readonly Emote? _rightEmote = rEmote is not null ? rEmote : null;
-        private readonly Emoji _leftEmoji = new("◀️");
-        private readonly Emote? _leftEmote = lEmote is not null ? lEmote : null;
-        private readonly TimeSpan _timeOut = TimeSpan.FromMinutes(time);
 
-        private (int, int) Range(int current)
+        private readonly IEmote _left =
+            lEmote is not null ? lEmote : new Emoji("◀️");
+        private readonly IEmote _right =
+            rEmote is not null ? rEmote : new Emoji("▶️");
+
+        private int TotalPages => Math.Max(1, (int)Math.Ceiling(_items.Count / (double)_disp));
+
+        private (int start, int count, int uiMin, int uiMax) PageWindow(int page1Based)
         {
-            int min, max;
-
-            if (current <= 1)
-            {
-                max = _disp - 1;
-                min = 0;
-            }
-            else
-            {
-                min = (current - 1) * _disp;
-                max = min + (_disp - 1);
-            }
-
-            if (min >= _list.Count())
-                min = _list.Count() - 1;
-            if (max >= _list.Count())
-                max = _list.Count();
-
-            if (min > 0 || max > 0) return (min, max);
-            min = 0;
-            max = 0;
-
-            return (min, max);
+            var page = Math.Clamp(page1Based, 1, TotalPages);
+            int start = (page - 1) * _disp;
+            int count = Math.Max(0, Math.Min(_disp, _items.Count - start));
+            int uiMin = count == 0 ? 0 : start;
+            int uiMax = count == 0 ? 0 : start + count - 1;
+            return (start, count, uiMin, uiMax);
         }
 
-        private static int Back(ref int current)
-            => current <= 1 ? 1 : --current;
-
-        private int Front(ref int current)
-            => (float)current >= ((float)_list.Count() / (float)_disp) ? current : ++current;
-
-
-
-        public void Send(ISocketMessageChannel channel)
+        public async Task SendAsync(ISocketMessageChannel channel)
         {
-            var current = _first;
-            var (min, max) = Range(current);
-            var m = channel.SendMessageAsync(string.Empty, false, _redraw(_list.ToList().GetRange(min, max - min), new LocationInformation()
+            if (_items.Count == 0)
             {
-                Min = min,
-                Max = max,
-                Current = current,
-                List = _list
-            })).Result;
+                var empty = new EmbedBuilder()
+                    .WithTitle("Nothing to display")
+                    .WithDescription("This list is empty.")
+                    .WithColor(new Color(255, 179, 255))
+                    .Build();
 
-            if (_leftEmote is not null)
-            {
-                m.AddReactionHandler(_leftEmote, u =>
-                {
-                    var (bot, top) = Range(Back(ref current));
-                    m.ModifyAsync(msg => msg.Embed = _redraw(_list.ToList().GetRange(bot, top - bot), new LocationInformation()
-                    {
-                        Min = bot,
-                        Max = top,
-                        Current = current,
-                        List = _list
-                    }));
-                }, _timeOut);
-
-            }
-            else
-            {
-                m.AddReactionHandler(_leftEmoji, u =>
-                {
-                    var (bot, top) = Range(Back(ref current));
-                    m.ModifyAsync(msg => msg.Embed = _redraw(_list.ToList().GetRange(bot, top - bot), new LocationInformation()
-                    {
-                        Min = bot,
-                        Max = top,
-                        Current = current,
-                        List = _list
-                    }));
-                }, _timeOut);
+                await channel.SendMessageAsync(embed: empty);
+                return;
             }
 
-            if (_rightEmote is not null)
+            int currentPage = Math.Clamp(_first, 1, TotalPages);
+            var (start, count, uiMin, uiMax) = PageWindow(currentPage);
+            var slice = _items.Skip(start).Take(count);
+
+            var embed = _redraw(slice, new LocationInformation
             {
-                m.AddReactionHandler(_rightEmote, u =>
-                {
-                    var (bot, top) = Range(Front(ref current));
-                    m.ModifyAsync(msg => msg.Embed = _redraw(_list.ToList().GetRange(bot, top - bot), new LocationInformation()
-                    {
-                        Min = bot,
-                        Max = top,
-                        Current = current,
-                        List = _list
-                    }));
-                }, _timeOut);
-            }
-            else
+                Min = uiMin,
+                Max = uiMax,
+                Current = currentPage,
+                List = _items
+            });
+
+            var msg = await channel.SendMessageAsync(embed: embed);
+
+            await msg.AddReactionAsync(_left);
+            await msg.AddReactionAsync(_right);
+
+            msg.AddReactionHandler(_left, user =>
             {
-                m.AddReactionHandler(_rightEmoji, u =>
+                if (allowedUserId.HasValue && user.Id != allowedUserId.Value) return;
+
+                if (currentPage <= 1) return;
+                currentPage--;
+                var (s, c, uMin, uMax) = PageWindow(currentPage);
+                var pageSlice = _items.Skip(s).Take(c);
+                var e = _redraw(pageSlice, new LocationInformation
                 {
-                    var (bot, top) = Range(Front(ref current));
-                    m.ModifyAsync(msg => msg.Embed = _redraw(_list.ToList().GetRange(bot, top - bot), new LocationInformation()
-                    {
-                        Min = bot,
-                        Max = top,
-                        Current = current,
-                        List = _list
-                    }));
-                }, _timeOut);
-            }
+                    Min = uMin,
+                    Max = uMax,
+                    Current = currentPage,
+                    List = _items
+                });
+
+                _ = msg.ModifyAsync(m => m.Embed = e);
+            }, _timeout);
+
+            // Right
+            msg.AddReactionHandler(_right, user =>
+            {
+                if (allowedUserId.HasValue && user.Id != allowedUserId.Value) return;
+
+                if (currentPage >= TotalPages) return;
+                currentPage++;
+                var (s, c, uMin, uMax) = PageWindow(currentPage);
+                var pageSlice = _items.Skip(s).Take(c);
+                var e = _redraw(pageSlice, new LocationInformation
+                {
+                    Min = uMin,
+                    Max = uMax,
+                    Current = currentPage,
+                    List = _items
+                });
+
+                _ = msg.ModifyAsync(m => m.Embed = e);
+            }, _timeout);
         }
-
-
     }
 }

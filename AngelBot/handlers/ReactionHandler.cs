@@ -7,99 +7,55 @@ namespace AngelBot.Handlers
 {
     static class ReactionHandler
     {
-        private static readonly Dictionary<Tuple<ulong, string>, Tuple<Action<IUser>,bool,long>> List = new Dictionary<Tuple<ulong, string>, Tuple<Action<IUser>,bool,long>>();
-        private static readonly Lock Lock = new();
+        private static readonly Lock _lock = new();
+        private static readonly Dictionary<(ulong MsgId, string Emote),
+            (Action<IUser> Callback, bool Stay, long Expires)> _map = [];
 
-        public static void AddReactionHandler(this IMessage msg, Emote rec, Action<IUser> x, TimeSpan t, bool stay = true, bool removereaction = true)
+        public static void AddReactionHandler(this IMessage msg, IEmote emote,
+            Action<IUser> onClick, TimeSpan ttl, bool stay = true, bool removeReaction = true)
         {
-            if (msg is IUserMessage m)
+            if (msg is IUserMessage um) _ = um.AddReactionAsync(emote);
+
+            Action<IUser> wrapper = user =>
             {
-                m.AddReactionAsync(rec);
-            }
+                if (removeReaction && msg is IUserMessage rm)
+                    _ = rm.RemoveReactionAsync(emote, user);
+                onClick(user);
+            };
 
-            Add(msg, rec, x + (y =>
+            lock (_lock)
             {
-                if (removereaction && msg is IUserMessage z) z.RemoveReactionAsync(rec, y);
+                var key = (msg.Id, emote.Name);
+                var expires = (DateTime.UtcNow + ttl).Ticks;
 
-            }), t, stay);
-        }
-
-        public static void AddReactionHandler(this IMessage msg, Emoji rec, Action<IUser> x, TimeSpan t, bool stay = true, bool removereaction = true)
-        {
-            if (msg is IUserMessage m)
-            {
-                m.AddReactionAsync(rec);
-            }
-
-            Add(msg, rec, x + (y =>
-            {
-                if (removereaction && msg is IUserMessage z) z.RemoveReactionAsync(rec, y);
-
-            }), t, stay);
-        }
-
-        private static void Add(IMessage msg, Emote rec, Action<IUser> x, TimeSpan t, bool stay = true)
-        {
-            var r = new Tuple<ulong, string>(msg.Id, rec.Name);
-
-            lock (Lock)
-            {
-                if (List.ContainsKey(r))
-                {
-                    List[r] = new Tuple<Action<IUser>, bool, long>(List[r].Item1 + x, stay, (DateTime.Now + t).ToBinary());
-                }
+                if (_map.TryGetValue(key, out var existing))
+                    _map[key] = (existing.Callback + wrapper, stay, expires);
                 else
-                {
-                    List.Add(r, new Tuple<Action<IUser>, bool, long>(x, stay, (DateTime.Now + t).ToBinary()));
-                }
+                    _map[key] = (wrapper, stay, expires);
             }
-
         }
-        
-        private static void Add(IMessage msg, Emoji rec, Action<IUser> x, TimeSpan t, bool stay = true)
+
+        public static void Invoke(ulong messageId, string emoteName, IUser user)
         {
-            var r = new Tuple<ulong, string>(msg.Id, rec.Name);
+            if (user?.IsBot == true) return;
 
-            lock(Lock)
+            var key = (messageId, emoteName);
+            lock (_lock)
             {
-                if (List.ContainsKey(r))
+                Console.WriteLine($"{emoteName}");
+                if (!_map.TryGetValue(key, out var entry)) return;
+
+                if (new DateTime(entry.Expires, DateTimeKind.Utc) < DateTime.UtcNow)
                 {
-                    List[r] = new Tuple<Action<IUser>, bool, long>(List[r].Item1 + x, stay, (DateTime.Now + t).ToBinary());
+                    _map.Remove(key);
+                    return;
                 }
-                else
-                {
-                    List.Add(r, new Tuple<Action<IUser>, bool, long>(x, stay, (DateTime.Now + t).ToBinary()));
-                }
-            }
+                if (user == null) return;
 
-        }
-
-        public static void Invoke(ulong msg, string rec, IUser usr)
-        {
-            try
-            {
-                if (usr.IsBot) return;
-                var r = new Tuple<ulong, string>(msg, rec);
-
-                lock (Lock)
-                {
-                    if (!List.ContainsKey(r)) return;
-                    if (DateTime.FromBinary(List[r].Item3) < DateTime.Now)
-                    {
-                        List.Remove(r);
-                        return;
-                    }
-
-                    List[r].Item1.Invoke(usr);
-
-                    if (!List[r].Item2)
-                        List.Remove(r);
-                }
-            } catch(Exception e)
-            {
-                Console.WriteLine(e);
+                entry.Callback?.Invoke(user);
+                if (!entry.Stay) _map.Remove(key);
             }
         }
-
     }
+
 }
