@@ -1,5 +1,3 @@
-using System.Dynamic;
-using System.Security.Authentication;
 using AngelBot.Classes;
 using AngelBot.Interfaces;
 using Discord;
@@ -29,7 +27,7 @@ namespace AngelBot.Handlers
             client.MessageReceived += MessageReceived;
             client.SlashCommandExecuted += SlashCommandExecuted;
 
-            client.ReactionAdded += ReactionAdded; 
+            client.ReactionAdded += ReactionAdded;
 
         }
 
@@ -173,13 +171,20 @@ namespace AngelBot.Handlers
 
         private async Task ReactionAdded(Cacheable<IUserMessage, ulong> cacheableMessage, Cacheable<IMessageChannel, ulong> cacheableChannel, SocketReaction reaction)
         {
+
             if (reaction.UserId == _mainClient.CurrentUser.Id) return;
-            var user = reaction.User.IsSpecified ? reaction.User.Value : await _mainClient.GetUserAsync(reaction.UserId);
-            ReactionHandler.Invoke(cacheableMessage.Id, reaction.Emote.Name, user);
+
+            var user = reaction.User.IsSpecified
+                ? reaction.User.Value
+                : await _mainClient.GetUserAsync(reaction.UserId);
+
+            ReactionHandler.Invoke(reaction.MessageId, reaction.Emote, user);
+
             await Task.CompletedTask;
         }
 
-        private Command? GetMatchingCommand(string name)
+
+        private static Command? GetMatchingCommand(string name)
         {
             var match = CommandList.OfType<Command>().FirstOrDefault(c => c.Names.Any(n => n.Equals(name, StringComparison.OrdinalIgnoreCase)));
             if (match is null) return null;

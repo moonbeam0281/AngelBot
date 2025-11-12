@@ -1,61 +1,94 @@
-using System;
-using System.Collections.Generic;
 using Discord;
-using Discord.WebSocket;
 
 namespace AngelBot.Handlers
 {
-    static class ReactionHandler
+    public static class ReactionHandler
     {
-        private static readonly Lock _lock = new();
-        private static readonly Dictionary<(ulong MsgId, string Emote),
-            (Action<IUser> Callback, bool Stay, long Expires)> _map = [];
+        private static readonly object _lock = new();
 
-        public static void AddReactionHandler(this IMessage msg, IEmote emote,
-            Action<IUser> onClick, TimeSpan ttl, bool stay = true, bool removeReaction = true)
+        private static readonly Dictionary<ulong, Dictionary<string, (Action<IUser> Callback, bool Stay, long Expires)>> _map = [];
+
+        private static string EmoteKey(IEmote emote) =>
+            emote switch
+            {
+                Emote custom => $"C:{custom.Id}",
+                Emoji emoji => $"U:{emoji.Name}",
+                _ => $"X:{emote.ToString()}"
+            };
+        public static void AddReactionHandler(
+            this IMessage msg,
+            IEmote emote,
+            Action<IUser> onClick,
+            TimeSpan ttl,
+            bool stay = true,
+            bool removeReaction = true)
         {
-            if (msg is IUserMessage um) _ = um.AddReactionAsync(emote);
+            if (msg is IUserMessage um)
+                _ = um.AddReactionAsync(emote);
 
             Action<IUser> wrapper = user =>
             {
                 if (removeReaction && msg is IUserMessage rm)
                     _ = rm.RemoveReactionAsync(emote, user);
+
                 onClick(user);
             };
 
+            var messageId = msg.Id;
+            var emoteKey = EmoteKey(emote);
+            var expires = (DateTime.UtcNow + ttl).Ticks;
+
             lock (_lock)
             {
-                var key = (msg.Id, emote.Name);
-                var expires = (DateTime.UtcNow + ttl).Ticks;
+                if (!_map.TryGetValue(messageId, out var perMessage))
+                {
+                    perMessage = new();
+                    _map[messageId] = perMessage;
+                }
 
-                if (_map.TryGetValue(key, out var existing))
-                    _map[key] = (existing.Callback + wrapper, stay, expires);
+                if (perMessage.TryGetValue(emoteKey, out var existing))
+                {
+                    perMessage[emoteKey] = (existing.Callback + wrapper, stay, expires);
+                }
                 else
-                    _map[key] = (wrapper, stay, expires);
+                {
+                    perMessage[emoteKey] = (wrapper, stay, expires);
+                }
             }
         }
 
-        public static void Invoke(ulong messageId, string emoteName, IUser user)
+        public static void Invoke(ulong messageId, IEmote emote, IUser user)
         {
             if (user?.IsBot == true) return;
 
-            var key = (messageId, emoteName);
+            var emoteKey = EmoteKey(emote);
+            var nowTicks = DateTime.UtcNow.Ticks;
+
             lock (_lock)
             {
-                Console.WriteLine($"{emoteName}");
-                if (!_map.TryGetValue(key, out var entry)) return;
+                if (!_map.TryGetValue(messageId, out var perMessage))
+                    return;
 
-                if (new DateTime(entry.Expires, DateTimeKind.Utc) < DateTime.UtcNow)
+                if (!perMessage.TryGetValue(emoteKey, out var entry))
+                    return;
+
+                if (entry.Expires < nowTicks)
                 {
-                    _map.Remove(key);
+                    perMessage.Remove(emoteKey);
+                    if (perMessage.Count == 0)
+                        _map.Remove(messageId);
                     return;
                 }
-                if (user == null) return;
-
+                if (user is null) return;
                 entry.Callback?.Invoke(user);
-                if (!entry.Stay) _map.Remove(key);
+
+                if (!entry.Stay)
+                {
+                    perMessage.Remove(emoteKey);
+                    if (perMessage.Count == 0)
+                        _map.Remove(messageId);
+                }
             }
         }
     }
-
 }

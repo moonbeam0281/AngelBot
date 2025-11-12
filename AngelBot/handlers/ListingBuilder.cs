@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 
@@ -77,15 +73,14 @@ namespace AngelBot.Handlers
 
             var msg = await channel.SendMessageAsync(embed: embed);
 
-            await msg.AddReactionAsync(_left);
-            await msg.AddReactionAsync(_right);
-
+            // Left
             msg.AddReactionHandler(_left, user =>
             {
                 if (allowedUserId.HasValue && user.Id != allowedUserId.Value) return;
-
                 if (currentPage <= 1) return;
+
                 currentPage--;
+
                 var (s, c, uMin, uMax) = PageWindow(currentPage);
                 var pageSlice = _items.Skip(s).Take(c);
                 var e = _redraw(pageSlice, new LocationInformation
@@ -103,9 +98,10 @@ namespace AngelBot.Handlers
             msg.AddReactionHandler(_right, user =>
             {
                 if (allowedUserId.HasValue && user.Id != allowedUserId.Value) return;
-
                 if (currentPage >= TotalPages) return;
+
                 currentPage++;
+
                 var (s, c, uMin, uMax) = PageWindow(currentPage);
                 var pageSlice = _items.Skip(s).Take(c);
                 var e = _redraw(pageSlice, new LocationInformation
@@ -119,5 +115,6 @@ namespace AngelBot.Handlers
                 _ = msg.ModifyAsync(m => m.Embed = e);
             }, _timeout);
         }
+
     }
 }

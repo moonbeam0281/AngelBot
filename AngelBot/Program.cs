@@ -10,11 +10,13 @@ namespace AngelBot
     {
         private static readonly DiscordSocketConfig Config = new()
         {
-            MessageCacheSize = 100,
             GatewayIntents =
-                GatewayIntents.Guilds
-                | GatewayIntents.GuildMessages
-                | GatewayIntents.MessageContent
+                GatewayIntents.Guilds |
+                GatewayIntents.GuildMessages |
+                GatewayIntents.GuildMessageReactions |
+                GatewayIntents.DirectMessages |
+                GatewayIntents.DirectMessageReactions |
+                GatewayIntents.MessageContent
         };
         private static readonly DiscordSocketClient Client = new(Config);
         private static DiscordEventHadnler? _Events;
