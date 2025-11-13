@@ -21,7 +21,7 @@ namespace AngelBot.Interfaces
         public bool VisibleInHelp { get; init; } = true;
     }
 
-    public enum SlashScope {None, Global, Guild}
+    public enum SlashScope { None, Global, Guild }
 
-    public enum CommandCategory {General, Utility, Fun, Moderation, Management, Music, Security, Information, Developer, Owenr}
+    public enum CommandCategory { General, Utility, Fun, Moderation, Management, Music, Security, Information, Developer, Owenr }
 }

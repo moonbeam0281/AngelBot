@@ -39,74 +39,74 @@ namespace AngelBot.Handlers
             if (!basePrefixes.Contains(mention)) basePrefixes.Add(mention);
             if (!basePrefixes.Contains(mentionNick)) basePrefixes.Add(mentionNick);
 
-            Console.WriteLine($"Added prefixes to bot: {basePrefixes.Aggregate("", (a, b) => { return $"{a}, {b}"; })}");
+            await Log(new LogMessage(LogSeverity.Info, "Prefixes", $"Added prefixes to bot: {basePrefixes.Aggregate("", (a, b) => { return $"{a}, {b}"; })}"));
 
-            LoadCommands();
+            await LoadCommands();
 
             await LoadSlashCommands();
 
-            await Log(new LogMessage(LogSeverity.Info, "Ready",
-            $"Logged in as {_mainClient.CurrentUser} | prefixes: {string.Join(", ", basePrefixes)}"));
+            await Log(new LogMessage(LogSeverity.Info, "Ready", $"Logged in as {_mainClient.CurrentUser} | prefixes: {string.Join(", ", basePrefixes)}"));
 
             await Task.CompletedTask;
         }
 
-        private void LoadCommands()
+        private async Task LoadCommands()
         {
             var newList = new List<ICommand>();
 
-            GlobalFunctions.GetAllTypes<IPreLoad>().ToList().ForEach(command =>
+            foreach(var preLoad in GlobalFunctions.GetAllTypes<IPreLoad>())
             {
                 try
                 {
-                    Console.WriteLine($"Loaded {command.Name} and ran preload...");
-                    ((IPreLoad)Activator.CreateInstance(command)!).PreLoad(_mainClient);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine($"Error while running...\n{e}");
-                }
-            });
+                    await Log(new LogMessage(LogSeverity.Debug, "PreLoad", $"Started {preLoad.Name} preload..."));
+                    await ((IPreLoad)Activator.CreateInstance(preLoad)!).PreLoad(_mainClient);
+                    await Log(new LogMessage(LogSeverity.Info, "PreLoad", $"{preLoad.Name} preload was sucsessful"));
 
-            GlobalFunctions.GetAllTypes<ICommand>().ToList().ForEach(command =>
-            {
-                try
-                {
-                    Console.WriteLine($"Added new command: {command.Name}");
-                    newList.Add((ICommand)Activator.CreateInstance(command)!);
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine($"Error while loading...\n{e}");
+                    await Log(new LogMessage(LogSeverity.Error, "Error", $"Error while running preload on {preLoad.Name}\n{e}"));
                 }
-            });
+            }
+
+            foreach(var command in GlobalFunctions.GetAllTypes<ICommand>())
+            {
+                try
+                {
+                    newList.Add((ICommand)Activator.CreateInstance(command)!);
+                    await Log(new LogMessage(LogSeverity.Info, "NewCommand", $"Added new command: {command.Name}"));
+                }
+                catch (Exception e)
+                {
+                    await Log(new LogMessage(LogSeverity.Error, "Error", $"Error while loading {command.Name}\n{e}"));
+                }
+            }
 
 
             CommandList = [.. newList];
         }
 
+        private static SlashCommandProperties[] GetProperties(SlashScope scope) => [.. CommandList.OfType<Command>().Where(c => c.Info.Scope == scope).Select(c => c.BuildSlash()).Where(b => b is not null).Select(b => b.Build())];
+
         private async Task LoadSlashCommands()
         {
-            var globalProps = CommandList.OfType<Command>().Where(c => c.Info.Scope == SlashScope.Global)
-            .Select(c => c.BuildSlash()).Where(b => b is not null).Select(b => b!.Build()).ToArray();
-
-            var guildProps = CommandList.OfType<Command>().Where(c => c.Info.Scope == SlashScope.Guild)
-            .Select(c => c.BuildSlash()).Where(c => c is not null).Select(b => b!.Build()).ToArray();
+            var globalProps = GetProperties(SlashScope.Global);
+            var guildProps = GetProperties(SlashScope.Guild);
 
             try
             {
                 await _mainClient.BulkOverwriteGlobalApplicationCommandsAsync(globalProps);
-                foreach (var x in globalProps) Console.WriteLine($"[Slash] Registered {x.Name} to global slash commands...");
+                foreach (var x in globalProps) await Log(new LogMessage(LogSeverity.Info, "SlashCommand", $"Registered {x.Name} to global slash commands"));
                 foreach (var guild in _mainClient.Guilds)
                 {
                     await _mainClient.Rest.BulkOverwriteGuildCommands(guildProps, guild.Id);
-                    Console.WriteLine($"[Slash] Registered {guildProps.Length} commands in guild {guild.Name} ({guild.Id})");
+                    await Log(new LogMessage(LogSeverity.Info, $"SlashGuild", $"Registered {guildProps.Length} commands in guild {guild.Name} ({guild.Id})"));
                 }
 
             }
             catch (Exception e)
             {
-                Console.WriteLine($"{e}");
+                await Log(new LogMessage(LogSeverity.Error, "Error", $"Error while loading slash commands\n{e}"));
             }
         }
 
@@ -143,10 +143,11 @@ namespace AngelBot.Handlers
                 if (match is null) return;
 
                 await match.Run(message, _mainClient, used, name, args);
+                await Log(new LogMessage(LogSeverity.Info, "CommandCall", $"Command {match.Info.Name} was called by {message.Author} in {message.Channel.Name}" + $"{(message.Channel as SocketGuildChannel)?.Guild.Name}"));
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                await Log(new LogMessage(LogSeverity.Error, "Error in command", $"There was an error while running commands\n{e}"));
             }
             await Task.CompletedTask;
         }
@@ -159,28 +160,42 @@ namespace AngelBot.Handlers
 
                 var match = GetMatchingCommand(name);
 
-                if (match is null) await interaction.RespondAsync("Unknown command.", ephemeral: true);
-                else await match.Run(interaction, _mainClient);
+                if (match is null)
+                {
+                    await interaction.RespondAsync("Unknown command.", ephemeral: true);
+                }
+                else
+                {
+                    await match.Run(interaction, _mainClient);
+                    await Log(new LogMessage(LogSeverity.Info, "SlashCall", $"Command {match.Info.Name} was called by {interaction.User} in {interaction.Channel.Name}" + $"{(interaction.Channel as SocketGuildChannel)?.Guild.Name}"));
+                }
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Error while running slash command:\n{e}");
-                await interaction.RespondAsync($"Error while running slash command: ```{e}```");
+                await Log(new LogMessage(LogSeverity.Error, "Error in slash", $"There was an error while running commands\n{e}"));
             }
         }
 
         private async Task ReactionAdded(Cacheable<IUserMessage, ulong> cacheableMessage, Cacheable<IMessageChannel, ulong> cacheableChannel, SocketReaction reaction)
         {
+            try
+            {
+                if (reaction.UserId == _mainClient.CurrentUser.Id) return;
 
-            if (reaction.UserId == _mainClient.CurrentUser.Id) return;
+                var user = reaction.User.IsSpecified
+                    ? reaction.User.Value
+                    : await _mainClient.GetUserAsync(reaction.UserId);
 
-            var user = reaction.User.IsSpecified
-                ? reaction.User.Value
-                : await _mainClient.GetUserAsync(reaction.UserId);
+                ReactionHandler.Invoke(reaction.MessageId, reaction.Emote, user);
+                await Log(new LogMessage(LogSeverity.Info, "ReactionHandled", $"{user} reacted to a handler"));
 
-            ReactionHandler.Invoke(reaction.MessageId, reaction.Emote, user);
+                await Task.CompletedTask;
+            }
+            catch (Exception e)
+            {
+                await Log(new LogMessage(LogSeverity.Error, "Error in Reaction", $"There was an error while running reaction handler\n{e}"));
+            }
 
-            await Task.CompletedTask;
         }
 
 

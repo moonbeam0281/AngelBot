@@ -19,8 +19,6 @@ namespace AngelBot
                 GatewayIntents.MessageContent
         };
         private static readonly DiscordSocketClient Client = new(Config);
-        private static DiscordEventHadnler? _Events;
-
         private static async Task Main()
         {
             DotEnv.Load();
@@ -37,7 +35,7 @@ namespace AngelBot
             Console.WriteLine("Starting up...");
             await Client.StartAsync();
             Console.WriteLine("Bot is running!");
-            _Events = new DiscordEventHadnler(Client);
+            _ = new DiscordEventHadnler(Client);
             await Task.Delay(-1);
         }
     }
