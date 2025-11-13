@@ -1,8 +1,6 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using AngelBot.Classes;
 using AngelBot.Handlers;
+using AngelBot.Interfaces;
 using Discord;
 using Discord.WebSocket;
 
@@ -10,32 +8,24 @@ namespace AngelBot.Commands
 {
     class Help : Command
     {
-        public Help() : base("help", "commands") { }
+        public Help() : base(new CommandInfo
+        {
+            Name = "help",
+            Description = "I list all my commands and usages!",
+            Aliases = ["help"],
+            Color = new Color(255,255,128),
+            Scope = SlashScope.Global,
+            Category = CommandCategory.Information,
+            UsageExamples = ["a!help", "a!help <command name>", "/help <command name>"]
+        }) { }
 
         private readonly string[] hiddenCommands = [ "any" ];
-
-        public override SlashScope Scope => SlashScope.Global;
-
-        public override EmbedBuilder HelpString()
-            => new()
-            {
-                Title = GetType().Name,
-                Description = "Command list and usage!",
-                Color = new Color(204, 204, 255),
-                Fields =
-                [
-                    new EmbedFieldBuilder {
-                        Name = "I display all my available commands and slash commands!",
-                        Value = "```a!help```"
-                    }
-                ]
-            };
 
         private async Task SendHelpEmbeds(IMessageChannel channel, SocketUser author, DiscordSocketClient client)
         {
             var commandList = DiscordEventHadnler.CommandList
                 .Cast<Command>()
-                .Where(x => !hiddenCommands.Any(y => x.Names.Contains(y)))
+                .Where(x => !hiddenCommands.Any(y => x.Info.Aliases.Contains(y)))
                 .ToList();
 
             var listingBuild = new ListingBuilder<Command>(commandList, (range, info) =>
@@ -56,7 +46,7 @@ namespace AngelBot.Commands
 
                 foreach (var x in range)
                 {
-                    var last3 = x.Names.Skip(Math.Max(0, x.Names.Count - 3));
+                    var last3 = x.Info.Aliases.Skip(Math.Max(0, x.Info.Aliases.Length - 3));
                     var temp = $"[`{string.Join(",", last3)}`]";
                     var help = x.HelpString();
                     e.AddField($"**{help.Title}**", $"{temp}\n{help.Description}");
@@ -73,13 +63,6 @@ namespace AngelBot.Commands
             await SendHelpEmbeds(message.Channel, message.Author, client);
             await Task.CompletedTask;
         }
-
-        public override SlashCommandBuilder BuildSlash()
-            => new()
-            {
-                Name = GetType().Name.ToLowerInvariant(),
-                Description = "Command list and usage!"
-            };
 
         public override async Task Run(SocketSlashCommand interaction, DiscordSocketClient client)
         {

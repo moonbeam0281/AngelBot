@@ -1,4 +1,5 @@
 using AngelBot.Classes;
+using AngelBot.Interfaces;
 using Discord;
 using Discord.WebSocket;
 
@@ -6,39 +7,22 @@ namespace AngelBot.Commands
 {
     class Ping : Command
     {
-        public Ping() : base("ping", "pong")
+        public Ping() : base(new CommandInfo
         {
+            Name = "ping",
+            Description = "Ping pong with the latency!",
+            Aliases = ["ping", "pong"],
+            Color = new Color(255,255,128),
+            Scope = SlashScope.Global,
+            Category = CommandCategory.Developer,
+            UsageExamples = ["a!ping", "angel ping", "/ping"]
+        }){ }
 
-        }
-
-        public override SlashScope Scope => SlashScope.Global;
-
-        public override EmbedBuilder HelpString()
-            => new()
-            {
-                Title = GetType().Name,
-                Description = "Ping Pong latency!",
-                Color = new Color(255, 255, 128),
-                Fields =
-                [
-                    new EmbedFieldBuilder{Name = "I will display my ping latency!", Value = "```a!ping/pong```"}
-                ]
-            };
-
-        public override Task Run(SocketMessage message, DiscordSocketClient client, string usedPrefix, string usedCommandName, string[] args)
+        public override async Task Run(SocketMessage message, DiscordSocketClient client, string usedPrefix, string usedCommandName, string[] args)
         {
             var pingpong = usedCommandName[1] == 'i' ? 'o' : 'i';
-            message.Channel.SendMessageAsync($":ping_pong: P{pingpong}ng! : **{client.Latency}**ms");
-
-            return Task.CompletedTask;
+            await message.Channel.SendMessageAsync($":ping_pong: P{pingpong}ng! : **{client.Latency}**ms");
         }
-
-        public override SlashCommandBuilder BuildSlash()
-            => new()
-            {
-                Name = GetType().Name.ToLowerInvariant(),
-                Description = "Ping pong latency!"
-            };
 
         public override async Task Run(SocketSlashCommand interaction, DiscordSocketClient client)
         {

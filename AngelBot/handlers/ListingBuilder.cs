@@ -73,7 +73,6 @@ namespace AngelBot.Handlers
 
             var msg = await channel.SendMessageAsync(embed: embed);
 
-            // Left
             msg.AddReactionHandler(_left, user =>
             {
                 if (allowedUserId.HasValue && user.Id != allowedUserId.Value) return;
@@ -94,7 +93,6 @@ namespace AngelBot.Handlers
                 _ = msg.ModifyAsync(m => m.Embed = e);
             }, _timeout);
 
-            // Right
             msg.AddReactionHandler(_right, user =>
             {
                 if (allowedUserId.HasValue && user.Id != allowedUserId.Value) return;

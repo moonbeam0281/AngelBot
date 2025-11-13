@@ -4,7 +4,7 @@ namespace AngelBot.Handlers
 {
     public static class ReactionHandler
     {
-        private static readonly object _lock = new();
+        private static readonly Lock _lock = new();
 
         private static readonly Dictionary<ulong, Dictionary<string, (Action<IUser> Callback, bool Stay, long Expires)>> _map = [];
 
@@ -13,7 +13,7 @@ namespace AngelBot.Handlers
             {
                 Emote custom => $"C:{custom.Id}",
                 Emoji emoji => $"U:{emoji.Name}",
-                _ => $"X:{emote.ToString()}"
+                _ => $"X:{emote}"
             };
         public static void AddReactionHandler(
             this IMessage msg,
@@ -42,7 +42,7 @@ namespace AngelBot.Handlers
             {
                 if (!_map.TryGetValue(messageId, out var perMessage))
                 {
-                    perMessage = new();
+                    perMessage = [];
                     _map[messageId] = perMessage;
                 }
 

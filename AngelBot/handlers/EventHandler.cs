@@ -87,10 +87,10 @@ namespace AngelBot.Handlers
 
         private async Task LoadSlashCommands()
         {
-            var globalProps = CommandList.OfType<Command>().Where(c => c.Scope == SlashScope.Global)
+            var globalProps = CommandList.OfType<Command>().Where(c => c.Info.Scope == SlashScope.Global)
             .Select(c => c.BuildSlash()).Where(b => b is not null).Select(b => b!.Build()).ToArray();
 
-            var guildProps = CommandList.OfType<Command>().Where(c => c.Scope == SlashScope.Guild)
+            var guildProps = CommandList.OfType<Command>().Where(c => c.Info.Scope == SlashScope.Guild)
             .Select(c => c.BuildSlash()).Where(c => c is not null).Select(b => b!.Build()).ToArray();
 
             try
@@ -186,7 +186,7 @@ namespace AngelBot.Handlers
 
         private static Command? GetMatchingCommand(string name)
         {
-            var match = CommandList.OfType<Command>().FirstOrDefault(c => c.Names.Any(n => n.Equals(name, StringComparison.OrdinalIgnoreCase)));
+            var match = CommandList.OfType<Command>().FirstOrDefault(c => c.Info.Aliases.Any(n => n.Equals(name, StringComparison.OrdinalIgnoreCase)));
             if (match is null) return null;
             else return match;
         }

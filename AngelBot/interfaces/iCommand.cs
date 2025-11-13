@@ -5,11 +5,14 @@ namespace AngelBot.Interfaces
 {
     public interface ICommand
     {
-        IReadOnlyCollection<string> Names { get; }
+        CommandInfo Info { get; }
+
+        EmbedBuilder HelpString();
+        SlashCommandBuilder BuildSlash();
+
         Task Run(SocketMessage message, DiscordSocketClient client, string usedPrefix, string usedCommandName, string[] args);
 
         Task Run(SocketSlashCommand interaction, DiscordSocketClient client);
 
-        SlashCommandBuilder BuildSlash();
     }
 }
