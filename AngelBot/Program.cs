@@ -1,4 +1,5 @@
-﻿using AngelBot.Handlers;
+﻿using AngelBot.APIServices;
+using AngelBot.Handlers;
 using Discord;
 using Discord.WebSocket;
 using dotenv.net;
@@ -32,10 +33,12 @@ namespace AngelBot
             }
             Console.WriteLine("Logging into bot using token...");
             await Client.LoginAsync(TokenType.Bot, token);
+            var eventHandler = new DiscordEventHandler(Client);
             Console.WriteLine("Starting up...");
             await Client.StartAsync();
             Console.WriteLine("Bot is running!");
-            _ = new DiscordEventHadnler(Client);
+            var apiServer = new ApiServer(eventHandler, Client);
+            apiServer.Start();
             await Task.Delay(-1);
         }
     }

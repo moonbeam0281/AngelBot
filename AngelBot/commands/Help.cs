@@ -23,7 +23,7 @@ namespace AngelBot.Commands
 
         private async Task SendHelpEmbeds(IMessageChannel channel, SocketUser author, DiscordSocketClient client)
         {
-            var commandList = DiscordEventHadnler.CommandList
+            var commandList = DiscordEventHandler.CommandList
                 .Cast<Command>()
                 .Where(x => !hiddenCommands.Any(y => x.Info.Aliases.Contains(y)))
                 .ToList();

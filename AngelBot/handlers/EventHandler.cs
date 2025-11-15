@@ -5,19 +5,19 @@ using Discord.WebSocket;
 
 namespace AngelBot.Handlers
 {
-    public class DiscordEventHadnler
+    public class DiscordEventHandler
     {
         private readonly DiscordSocketClient _mainClient;
-        internal readonly List<LogMessage> OutputLog = [];
+        public readonly List<LogMessage> OutputLog = [];
+        internal readonly object OutputLogLock = new();
         public static ICommand[] CommandList = [];
         private readonly List<string> basePrefixes =
         [
             "angel",
             "a!"
         ];
-        internal static readonly object OutputLogLock = new();
 
-        public DiscordEventHadnler(DiscordSocketClient client)
+        public DiscordEventHandler(DiscordSocketClient client)
         {
             _mainClient = client;
 
@@ -86,7 +86,7 @@ namespace AngelBot.Handlers
             CommandList = [.. newList];
         }
 
-        private static SlashCommandProperties[] GetProperties(SlashScope scope) => [.. CommandList.OfType<Command>().Where(c => c.Info.Scope == scope).Select(c => c.BuildSlash()).Where(b => b is not null).Select(b => b.Build())];
+        private SlashCommandProperties[] GetProperties(SlashScope scope) => [.. CommandList.OfType<Command>().Where(c => c.Info.Scope == scope).Select(c => c.BuildSlash()).Where(b => b is not null).Select(b => b.Build())];
 
         private async Task LoadSlashCommands()
         {
@@ -199,7 +199,7 @@ namespace AngelBot.Handlers
         }
 
 
-        private static Command? GetMatchingCommand(string name)
+        private Command? GetMatchingCommand(string name)
         {
             var match = CommandList.OfType<Command>().FirstOrDefault(c => c.Info.Aliases.Any(n => n.Equals(name, StringComparison.OrdinalIgnoreCase)));
             if (match is null) return null;
