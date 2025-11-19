@@ -1,11 +1,7 @@
 using System.Net;
-using System.Reflection;
-using System.Text;
-using System.Text.Json;
 using AngelBot.Classes;
 using AngelBot.Handlers;
 using AngelBot.Interfaces;
-using Discord;
 using Discord.WebSocket;
 
 namespace AngelBot.APIServices
@@ -82,6 +78,12 @@ namespace AngelBot.APIServices
             if (method == "OPTIONS")
             {
                 ctx.Response.StatusCode = 204;
+
+                ctx.Response.Headers["Access-Control-Allow-Origin"] = "http://localhost:5173";
+                ctx.Response.Headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS";
+                ctx.Response.Headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization";
+                ctx.Response.Headers["Access-Control-Allow-Credentials"] = "true";
+
                 ctx.Response.Close();
                 return;
             }
