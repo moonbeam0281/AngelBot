@@ -4,6 +4,7 @@ import Login from "./pages/Login.jsx";
 import Landing from "./pages/Landing.jsx";
 import { AuthProvider, useAuth } from "./context/AuthContext.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
+import NotFound from "./pages/NotFound.jsx";
 
 function ProtectedRoute({ children }) {
   const { isAuth, loading } = useAuth();
@@ -28,6 +29,7 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route to="*" element={<NotFound />} />
       </Routes>
     </AuthProvider>
   );

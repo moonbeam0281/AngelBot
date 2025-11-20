@@ -1,31 +1,74 @@
+/* SIDEBAR ROOT */
 .sidebar-root {
     width: 240px;
     background: #0b0f1a;
     height: 100vh;
-    padding: 20px 0;
     border-right: 1px solid rgba(135, 206, 255, 0.2);
     display: flex;
     flex-direction: column;
-    position: fixed;
-    left: 0;
-    top: 0;
+    /* no position:fixed anymore – flex layout will handle it */
+    transition: width 0.2s ease;
+    flex-shrink: 0; /* keep width when flexing */
 }
 
-.sidebar-title {
-    color: #8fd5ff;
-    font-size: 1.5rem;
-    font-weight: 600;
-    text-align: center;
-    margin-bottom: 30px;
-    letter-spacing: 1px;
+/* When collapsed, shrink width */
+.sidebar-root.collapsed {
+    width: 72px; /* just enough for icons + avatar */
 }
 
+/* BOT CARD */
+.sidebar-bot-card {
+    height: 120px;
+    width: 100%;
+    background-size: cover;
+    background-position: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding-bottom: 10px;
+    position: relative;
+}
+
+.sidebar-bot-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    backdrop-filter: blur(13px);
+    opacity: 0.5;
+}
+
+.sidebar-bot-avatar {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    border: 2px solid white;
+    z-index: 2;
+}
+
+.sidebar-bot-name {
+    margin-top: 6px;
+    font-weight: bold;
+    z-index: 2;
+}
+
+/* Hide bot name when collapsed */
+.sidebar-root.collapsed .sidebar-bot-name {
+    display: none;
+}
+
+/* ITEMS AREA */
 .sidebar-items {
+    flex: 1;
+    padding: 8px 0;
     display: flex;
     flex-direction: column;
     gap: 6px;
+    margin-top: 10px;
 }
 
+/* Sidebar links */
 .sidebar-item {
     display: flex;
     align-items: center;
@@ -35,6 +78,8 @@
     text-decoration: none;
     transition: 0.2s;
     border-radius: 6px;
+    opacity: 0.85;
+    cursor: pointer;
 }
 
 .sidebar-item:hover {
@@ -44,8 +89,45 @@
 .sidebar-item.active {
     background: rgba(135, 206, 255, 0.25);
     color: #fff;
+    opacity: 1;
 }
 
 .sidebar-icon {
     font-size: 1.2rem;
+}
+
+/* When collapsed, hide text labels but keep icons */
+.sidebar-root.collapsed .sidebar-label {
+    display: none;
+}
+
+/* Center icons when collapsed */
+.sidebar-root.collapsed .sidebar-item {
+    justify-content: center;
+}
+
+/* FOOTER + TOGGLE BUTTON */
+.sidebar-footer {
+    padding: 8px 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    justify-content: flex-end;
+}
+
+.sidebar-toggle-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    border: none;
+    outline: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.sidebar-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.18);
 }

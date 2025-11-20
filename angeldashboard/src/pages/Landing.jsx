@@ -5,14 +5,14 @@ import { useAuth } from "../context/AuthContext.jsx";
 
 export default function Landing() {
     const [hovering, setHovering] = useState(false);
-    const { isAuth, user, loginWithDiscord } = useAuth();
+    const { isAuth, user, startDiscordLogin } = useAuth();
     const navigate = useNavigate();
 
     const handleClick = () => {
         if (isAuth) {
             navigate("/dashboard");
         } else {
-            loginWithDiscord();
+            startDiscordLogin();
         }
     };
 

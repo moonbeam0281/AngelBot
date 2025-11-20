@@ -1,6 +1,5 @@
 import SideBar from "../components/SideBar";
 import NavBar from "../components/NavBar";
-//import "./Dashboard.css";
 
 export default function Dashboard() {
     return (

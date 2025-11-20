@@ -1,74 +1,89 @@
+// src/context/AuthContext.jsx
 import { createContext, useContext, useEffect, useState } from "react";
 import CONFIG from "../config";
 import {
-    loadAngelSession,
-    saveAngelSession,
-    clearAngelSession,
-    touchAngelSession
-} from "../handlers/sessionHandler";
+    callApiGet,
+    callApiPost,
+    exchangeDiscordCode,
+} from "../handlers/apiClientHandler";
 
 const AuthContext = createContext(null);
 
+function normalizeUser(raw) {
+    if (!raw) return null;
+
+    return {
+        id: raw.id ?? raw.Id ?? null,
+        username: raw.username ?? raw.Username ?? "",
+        discriminator: raw.discriminator ?? raw.Discriminator ?? "0",
+        avatar: raw.avatar ?? raw.Avatar ?? null,
+    };
+}
+
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
-    const [lastActiveAt, setLastActiveAt] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const session = loadAngelSession();
-        if (session?.user) {
-            setUser(session.user);
-            setLastActiveAt(session.lastActiveAt);
-        }
-        setLoading(false);
-    }, []);
+    const AUTH_API_BASE = CONFIG.API_BASE;
+    const isAuth = !!user;
 
     useEffect(() => {
-        if (!user) return;
+        let cancelled = false;
 
-        const bump = () => {
-            const updated = touchAngelSession();
-            if (updated) setLastActiveAt(updated.lastActiveAt);
-        };
+        callApiGet("/auth/me", true)
+            .then((res) => {
+                if (cancelled) return;
 
-        window.addEventListener("click", bump);
-        window.addEventListener("keydown", bump);
+                if (res.success && res.data?.ok) {
+                    const normalised = normalizeUser(res.data.user)
+                    setUser(normalised);
+                } else {
+                    setUser(null);
+                }
+            })
+            .catch(() => {
+                if (!cancelled) setUser(null);
+            })
+            .finally(() => {
+                if (!cancelled) setLoading(false);
+            });
 
         return () => {
-            window.removeEventListener("click", bump);
-            window.removeEventListener("keydown", bump);
+            cancelled = true;
         };
-    }, [user]);
+    }, []);
 
-    const AUTH_API_BASE = CONFIG.API_BASE;
-
-    const loginWithDiscord = () => {
+    const startDiscordLogin = () => {
         window.location.href = `${AUTH_API_BASE}/auth/discord/login`;
     };
 
-    const setAuthFromSession = (session) => {
-        if (!session?.user) return;
-        const stored = saveAngelSession(session.user);
-        setUser(stored.user);
-        setLastActiveAt(stored.lastActiveAt);
+    const completeLogin = async (code) => {
+        const res = await exchangeDiscordCode(code);
+        if (!res.success) {
+            throw new Error(res.error || "Auth failed");
+        }
+        const normalised = normalizeUser(res.user);
+        setUser(normalised);
+        return res;
     };
 
-    const logout = () => {
-        clearAngelSession();
-        setUser(null);
-        setLastActiveAt(null);
+    const logout = async () => {
+        try {
+            try {
+                return await callApiPost("/auth/logout", {}, true);
+            } catch { }
+        } finally {
+            setUser(null);
+        }
     };
-
-    const isAuth = !!user;
 
     const value = {
         user,
-        lastActiveAt,
         isAuth,
         loading,
-        loginWithDiscord,
+        startDiscordLogin,
+        completeLogin,
         logout,
-        setAuthFromSession
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

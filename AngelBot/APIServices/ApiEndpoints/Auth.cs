@@ -54,7 +54,7 @@ namespace AngelBot.APIServices.ApiEndpoints
                 var clientSecret = Environment.GetEnvironmentVariable("DISCORD_CLIENT_SECRET");
                 var redirectUri = Environment.GetEnvironmentVariable("DISCORD_REDIRECT_URI");
 
-                if(clientSecret is null || redirectUri is null)
+                if (clientSecret is null || redirectUri is null)
                 {
                     ctx.Response.StatusCode = 400;
                     await Json(ctx.Response, new { ok = false, error = ".env is missing data." });
@@ -114,13 +114,38 @@ namespace AngelBot.APIServices.ApiEndpoints
                         : null
                 };
 
+                // 3) Build DashboardUser DTO
+                var dashUser = new DashboardUser
+                {
+                    Id = user.id!,
+                    Username = user.username!,
+                    Discriminator = user.discriminator ?? "0",
+                    Avatar = user.avatar
+                };
+
+                // 4) Create JWT with 7-day lifetime
+                var jwt = JwtHelper.GenerateToken(dashUser, TimeSpan.FromDays(7));
+
+                // 5) Set HttpOnly cookie
+                var secure = false; // set true when using HTTPS
+                DashboardAuth.SetAuthCookie(ctx.Response, jwt, secure);
+
+                // 6) Respond with user (frontend does NOT see JWT)
+                ctx.Response.StatusCode = 200;
+                await Json(ctx.Response, new
+                {
+                    ok = true,
+                    user = dashUser
+                });
+
+                /*
                 // 4) Respond in shape expected by exchangeDiscordCode
                 ctx.Response.StatusCode = 200;
                 await Json(ctx.Response, new
                 {
                     ok = true,
                     user
-                });
+                });*/
             }
             catch (Exception e)
             {
