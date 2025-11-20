@@ -1,0 +1,250 @@
+/* Fullscreen container */
+.landing-root {
+    min-height: 100vh;
+    width: 100%;
+    background: radial-gradient(circle at top, #1b2238, #050716 60%, #02030a);
+    color: #f5f5ff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    position: relative;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* Angel background zone */
+.landing-bg {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+/* Subtle floating glow behind text (could be Angel silhouette later) */
+.landing-bg::before {
+    content: "";
+    position: absolute;
+    width: 380px;
+    height: 380px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(135, 206, 255, 0.9), rgba(135, 206, 255, 0));
+    filter: blur(8px);
+    opacity: 0.7;
+    animation: pulse-glow 6s ease-in-out infinite;
+}
+
+.landing-angel-title {
+    text-align: center;
+    z-index: 1;
+}
+
+.landing-angel-title h1 {
+    font-size: clamp(3rem, 5vw, 4.5rem);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+}
+
+.landing-angel-title p {
+    font-size: 1.05rem;
+    opacity: 0.8;
+}
+
+/* Bottom glow area */
+.landing-bottom-glow {
+    position: relative;
+    height: 140px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    background: linear-gradient(to Top, rgba(4, 8, 20, 0.95), rgba(4, 8, 20, 0));
+}
+
+.landing-bottom-glow::before {
+    content: "";
+    position: absolute;
+    bottom: -60px;
+    width: 90%;
+    height: 140px;
+    border-radius: 50%;
+    background: radial-gradient(circle at center, rgba(135, 206, 255, 0.45), transparent 60%);
+    filter: blur(18px);
+    opacity: 0.7;
+}
+
+/* Arrow hint */
+.landing-arrow {
+    margin-top: 12px;
+    font-size: 1.8rem;
+    animation: arrow-bounce 1.8s infinite;
+    z-index: 1;
+}
+
+/* Login bubble */
+.landing-login-bubble {
+    position: absolute;
+    top: -110px;
+    padding: 14px 18px;
+    border-radius: 14px;
+    background: rgba(7, 11, 25, 0.96);
+    box-shadow: 0 0 18px rgba(135, 206, 255, 0.4);
+    border: 1px solid rgba(135, 206, 255, 0.5);
+    max-width: 320px;
+    text-align: center;
+    cursor: pointer;
+    z-index: 2;
+    animation: bubble-pop 0.18s ease-out;
+}
+
+.landing-login-bubble p {
+    margin: 3px 0;
+}
+
+.landing-login-bubble .username {
+    font-weight: 600;
+    color: #8fd5ff;
+}
+
+.login-cta {
+    font-size: 0.95rem;
+    opacity: 0.9;
+}
+
+.login-btn {
+    margin-top: 8px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: none;
+    background: linear-gradient(135deg, #7dd8ff, #c1a3ff);
+    color: #050716;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.login-btn:hover {
+    filter: brightness(1.08);
+}
+
+/* Animations */
+@keyframes arrow-bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(6px);
+    }
+}
+
+@keyframes pulse-glow {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.65;
+    }
+
+    50% {
+        transform: scale(1.08);
+        opacity: 0.9;
+    }
+}
+
+@keyframes bubble-pop {
+    from {
+        transform: translateY(8px) scale(0.9);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+/* Loading */
+.app-loading {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #050716;
+    color: #f5f5ff;
+}
+
+.login-root {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: radial-gradient(circle at top, #1b2238, #050716 60%, #02030a);
+    color: #dbe9ff;
+}
+
+.login-card {
+    background: rgba(12, 18, 34, 0.85);
+    padding: 30px 40px;
+    border-radius: 12px;
+    border: 1px solid rgba(135, 206, 255, 0.25);
+    box-shadow: 0 0 20px rgba(135, 206, 255, 0.2);
+    text-align: center;
+    width: 330px;
+}
+
+.login-title {
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+    color: #8fd5ff;
+}
+
+.login-subtitle {
+    margin-bottom: 20px;
+    opacity: 0.85;
+}
+
+.login-discord-btn {
+    background: linear-gradient(135deg, #7dd8ff, #b596ff);
+    border: none;
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #050716;
+    font-size: 1rem;
+}
+
+.login-discord-btn:hover {
+    filter: brightness(1.1);
+}
+
+.dashboard-container {
+    display: flex;
+    width: 100%;
+    background: #08101c;
+    color: white;
+    min-height: 100vh;
+}
+
+.dashboard-main {
+    margin-left: 240px;
+    /* matches sidebar width */
+    width: calc(100% - 240px);
+}
+
+.dashboard-content {
+    padding: 30px 40px;
+}
+
+.dashboard-content h1 {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.dashboard-content p {
+    opacity: 0.8;
+}

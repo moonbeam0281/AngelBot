@@ -1,19 +1,21 @@
 import CONFIG from "../config";
+import { saveAngelSession } from "../handlers/sessionHandler";
 
 const API_BASE = CONFIG.API_BASE.replace(/\/$/, "");
 
-export function angelApiPost(route, body) {
+export function angelApiPost(route, body, method = "POST", cred = false) {
     return new Promise(async (resolve, reject) => {
         try {
             const cleanRoute = route.replace(/^\//, "");
             const url = `${API_BASE}/${cleanRoute}`;
 
             const res = await fetch(url, {
-                method: "POST",
+                method: method,
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify(body || {})
+                body: JSON.stringify(body || {}),
+                credentials: cred? "include" : "omit"
             });
 
             if (!res.ok) {
@@ -53,11 +55,12 @@ export function exchangeDiscordCode(code) {
             }
 
             const user = res.data.user;
-            localStorage.setItem("angelUser", JSON.stringify(user));
+            const session = saveAngelSession(user);
+            //localStorage.setItem("angelUser", JSON.stringify(user));
 
             resolve({
                 success: true,
-                user
+                session
             });
         } catch (e) {
             reject({
