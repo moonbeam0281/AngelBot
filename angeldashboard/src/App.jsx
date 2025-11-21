@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import { BotInfoProvider } from "./context/BotInfoContext.jsx";
+import Verify from "./pages/Verify.jsx";
 
 function ProtectedRoute({ children }) {
   const { isAuth, loading } = useAuth();
@@ -23,6 +24,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/join/verify" element={<Verify />} />
           <Route
             path="/dashboard"
             element={

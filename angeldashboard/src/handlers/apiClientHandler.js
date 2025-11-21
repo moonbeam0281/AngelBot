@@ -2,14 +2,10 @@ import CONFIG from "../config";
 
 const API_BASE = CONFIG.API_BASE.replace(/\/$/, "");
 
-// helper
 function normalizeRoute(route) {
     return route.replace(/^\//, "");
 }
 
-// -----------------------------
-// POST REQUEST (Promise-based)
-// -----------------------------
 export function callApiPost(route, body = {}, cred = false) {
     return new Promise(async (resolve, reject) => {
         try {
@@ -48,9 +44,6 @@ export function callApiPost(route, body = {}, cred = false) {
     });
 }
 
-// -----------------------------
-// GET REQUEST (Promise-based)
-// -----------------------------
 export function callApiGet(route, cred = false) {
     return new Promise(async (resolve, reject) => {
         try {
