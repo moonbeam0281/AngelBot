@@ -1,25 +1,15 @@
 import { Link, useLocation } from "react-router-dom";
 import "./SideBar.css";
-import { callApiGet } from "../handlers/apiClientHandler";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useBotInfo } from "../context/BotInfoContext";
 
 export default function SideBar() {
+    const { botInfo } = useBotInfo();
     const location = useLocation();
-    const [bot, setBot] = useState(null);
     const [collapsed, setCollapsed] = useState(true);
 
-    useEffect(() => {
-        callApiGet("/info/bot")
-            .then(res => {
-                if (res.success && res.data?.ok) {
-                    setBot(res.data.bot);
-                }
-            })
-            .catch(() => { });
-    }, []);
-
-    const bannerStyle = bot?.banner
-        ? { backgroundImage: `url(${bot.banner})` }
+    const bannerStyle = botInfo?.banner
+        ? { backgroundImage: `url(${botInfo.banner})` }
         : {};
 
     const items = [
@@ -32,14 +22,14 @@ export default function SideBar() {
     return (
         <div className={"sidebar-root" + (collapsed ? " collapsed" : "")}>
             <div className="sidebar-bot-card" style={bannerStyle}>
-                {bot && (
+                {botInfo && (
                     <>
                         <img
                             className="sidebar-bot-avatar"
-                            src={bot.avatar}
-                            alt={bot.name}
+                            src={botInfo.avatar}
+                            alt={botInfo.name}
                         />
-                        <div className="sidebar-bot-name">{bot.name}</div>
+                        <div className="sidebar-bot-name">{botInfo.name}</div>
                         {collapsed && <hr />}
                     </>
                 )}
@@ -62,6 +52,10 @@ export default function SideBar() {
             </div>
 
             <div className="sidebar-footer">
+                {!collapsed && <span className="sidebar-status">
+                    <span className={`status-dot ${botInfo?.status === "Connected" ? "online" : "offline"}`}></span>
+                    {botInfo?.status}
+                </span>}
                 <button
                     className="sidebar-toggle-btn"
                     onClick={() => setCollapsed(prev => !prev)}

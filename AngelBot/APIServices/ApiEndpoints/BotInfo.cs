@@ -19,15 +19,14 @@ namespace AngelBot.APIServices.ApiEndpoints
         {
             ApplyCors(ctx.Response);
 
-            var bot = client.CurrentUser;
-            var botId = bot.Id.ToString();
+            var botUser = await client.Rest.GetUserAsync(client.CurrentUser.Id);
 
             string avatarUrl;
-            if (!string.IsNullOrEmpty(bot.AvatarId))
+            if (!string.IsNullOrEmpty(botUser.AvatarId))
             {
-                var avatarHash = bot.AvatarId;
+                var avatarHash = botUser.AvatarId;
                 var avatarExt = avatarHash.StartsWith("a_") ? "gif" : "png";
-                avatarUrl = $"https://cdn.discordapp.com/avatars/{botId}/{avatarHash}.{avatarExt}?size=256";
+                avatarUrl = $"https://cdn.discordapp.com/avatars/{botUser.Id}/{avatarHash}.{avatarExt}?size=256";
             }
             else
             {
@@ -36,11 +35,11 @@ namespace AngelBot.APIServices.ApiEndpoints
             }
 
             string? bannerUrl = null;
-            if (!string.IsNullOrEmpty(bot.BannerId))
+            if (!string.IsNullOrEmpty(botUser.BannerId))
             {
-                var bannerHash = bot.BannerId;
+                var bannerHash = botUser.BannerId;
                 var bannerExt = bannerHash.StartsWith("a_") ? "gif" : "png";
-                bannerUrl = $"https://cdn.discordapp.com/banners/{botId}/{bannerHash}.{bannerExt}?size=600";
+                bannerUrl = $"https://cdn.discordapp.com/banners/{botUser.Id}/{bannerHash}.{bannerExt}?size=600";
             }
 
             await Json(ctx.Response, new
@@ -48,10 +47,13 @@ namespace AngelBot.APIServices.ApiEndpoints
                 ok = true,
                 bot = new
                 {
-                    id = bot.Id,
-                    name = bot.GlobalName,
+                    id = botUser.Id,
+                    name = botUser.Username,
                     avatar = avatarUrl,
-                    banner = bannerUrl
+                    banner = bannerUrl,
+                    serverCount = client.Guilds.Count,
+                    status = client.ConnectionState.ToString(),
+                    usersCount = client.Guilds.Sum(g => g.MemberCount)
                 }
             });
         }

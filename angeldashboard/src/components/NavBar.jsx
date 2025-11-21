@@ -1,14 +1,26 @@
 import { useAuth } from "../context/AuthContext";
 import { getDiscordAvatarUrl } from "../utils/discordAvatar";
+import { useBotInfo } from "../context/BotInfoContext";
 import "./NavBar.css";
 
 export default function NavBar() {
     const { user, logout } = useAuth();
+    const { botInfo } = useBotInfo();
     const avatarUrl = user ? getDiscordAvatarUrl(user, 64) : null;
 
     return (
         <div className="navbar-root">
-            <div className="navbar-left" />
+            <div className="navbar-left">
+                <div className="navbar-stats">
+                    <span className="navbar-stat">
+                        🛡️ {botInfo?.serverCount} servers
+                    </span>
+                    <span className="navbar-stat">
+                        👥 {botInfo?.userCount} users
+                    </span>
+                </div>
+            </div>
+
 
             <div className="navbar-right">
                 {user && (

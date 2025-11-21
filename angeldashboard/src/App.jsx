@@ -5,6 +5,7 @@ import Landing from "./pages/Landing.jsx";
 import { AuthProvider, useAuth } from "./context/AuthContext.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import NotFound from "./pages/NotFound.jsx";
+import { BotInfoProvider } from "./context/BotInfoContext.jsx";
 
 function ProtectedRoute({ children }) {
   const { isAuth, loading } = useAuth();
@@ -18,19 +19,21 @@ function ProtectedRoute({ children }) {
 export default function App() {
   return (
     <AuthProvider>
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<Login />} />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route to="*" element={<NotFound />} />
-      </Routes>
+      <BotInfoProvider>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route to="*" element={<NotFound />} />
+        </Routes>
+      </BotInfoProvider>
     </AuthProvider>
   );
 }

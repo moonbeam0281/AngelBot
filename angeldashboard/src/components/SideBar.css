@@ -111,7 +111,8 @@
     padding: 8px 10px;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    padding: 8px 12px;
 }
 
 .sidebar-toggle-btn {
@@ -130,4 +131,33 @@
 
 .sidebar-toggle-btn:hover {
     background: rgba(255, 255, 255, 0.18);
+}
+
+.sidebar-status {
+    display: flex;
+    align-items: center;
+    background: rgba(160,160,255,0.08);
+    border: 1px solid rgba(170,170,255,0.15);
+    border-radius: 6px;
+    gap: 8px;
+    color: #dadcff;
+    font-size: 0.9rem;
+    opacity: 0.85;
+    padding: 2px 8px 2px 8px;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.status-dot.online {
+    background: #4ade80; /* green */
+    box-shadow: 0 0 6px #4ade80;
+}
+
+.status-dot.offline {
+    background: #ef4444; /* red */
+    box-shadow: 0 0 6px #ef4444;
 }

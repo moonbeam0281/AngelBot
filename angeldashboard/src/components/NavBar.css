@@ -18,6 +18,10 @@
     margin-right: 15px;
 }
 
+.navbar-left{
+    margin-left: 15px;
+}
+
 .navbar-user {
     display: flex;
     align-items: center;
@@ -71,4 +75,36 @@
     color: #8fd5ff;
     border: 1px solid rgba(135, 206, 255, 0.4);
     font-weight: 600;
+}
+
+.navbar-botstats {
+    padding: 6px 12px;
+    background: linear-gradient(90deg, #3a3f58, #4c5671);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    font-size: 0.95rem;
+    color: #e7eaff;
+    white-space: nowrap;
+    backdrop-filter: blur(6px);
+    letter-spacing: 0.4px;
+    box-shadow: 0 0 8px rgba(150, 150, 255, 0.25);
+}
+
+.navbar-botstats b {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.navbar-stats {
+    display: flex;
+    gap: 12px;
+}
+
+.navbar-stat {
+    padding: 5px 10px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    font-size: 0.9rem;
+    color: white;
+    backdrop-filter: blur(4px);
 }
