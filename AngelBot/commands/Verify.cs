@@ -279,10 +279,7 @@ namespace AngelBot.Commands
 
             var url = $"{frontendPath.TrimEnd('/')}/join/verify?guildId={interaction.GuildId}&token={session.Token}";
 
-            await interaction.RespondAsync(
-                $"To verify, use this link: {url}",
-                ephemeral: true
-            );
+            await interaction.RespondAsync($"To verify, use this link: {url}", ephemeral: true);
         }
     }
 }

@@ -5,6 +5,7 @@ using AngelBot.Classes;
 using Discord.WebSocket;
 using AngelBot.Handlers;
 using AngelBot.Interfaces;
+using Discord;
 
 namespace AngelBot.APIServices.ApiEndpoints
 {
