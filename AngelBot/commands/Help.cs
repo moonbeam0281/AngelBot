@@ -137,7 +137,8 @@ namespace AngelBot.Commands
                 name: "command",
                 type: ApplicationCommandOptionType.String,
                 description: "Show detailed info for a specific command",
-                isRequired: false
+                isRequired: false,
+                isAutocomplete: true
             );
 
             return builder;

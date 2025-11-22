@@ -29,6 +29,9 @@ namespace AngelBot.Handlers
 
             client.ReactionAdded += ReactionAdded;
 
+            client.AutocompleteExecuted += AutocompleteExecuted;
+
+
         }
 
         private async Task OnReady()
@@ -54,7 +57,7 @@ namespace AngelBot.Handlers
         {
             var newList = new List<ICommand>();
 
-            foreach(var preLoad in GlobalFunctions.GetAllTypes<IPreLoad>())
+            foreach (var preLoad in GlobalFunctions.GetAllTypes<IPreLoad>())
             {
                 try
                 {
@@ -69,7 +72,7 @@ namespace AngelBot.Handlers
                 }
             }
 
-            foreach(var command in GlobalFunctions.GetAllTypes<ICommand>())
+            foreach (var command in GlobalFunctions.GetAllTypes<ICommand>())
             {
                 try
                 {
@@ -197,6 +200,41 @@ namespace AngelBot.Handlers
             }
 
         }
+
+
+
+        public static async Task AutocompleteExecuted(SocketAutocompleteInteraction interaction)
+        {
+            if (!string.Equals(interaction.Data.CommandName, "help", StringComparison.OrdinalIgnoreCase))
+                return;
+
+            var focused = interaction.Data.Options.FirstOrDefault(o => o.Focused);
+            if (focused == null || !string.Equals(focused.Name, "command", StringComparison.OrdinalIgnoreCase))
+                return;
+
+            var userInput = focused.Value?.ToString() ?? string.Empty;
+            userInput = userInput.ToLowerInvariant();
+
+            var allCommands = CommandList
+                .OfType<Command>()
+                .Where(c => c.Info != null);
+
+            var matches = allCommands
+                .Where(c =>
+                    string.IsNullOrEmpty(userInput) ||
+                    c.Info.Name.Contains(userInput, StringComparison.OrdinalIgnoreCase) ||
+                    c.Info.Aliases.Any(a => a.Contains(userInput, StringComparison.OrdinalIgnoreCase)))
+                .OrderBy(c => c.Info.Name)
+                .Take(20)
+                .Select(c => new AutocompleteResult(
+                    c.Info.Name,
+                    c.Info.Name
+                ))
+                .ToList();
+
+            await interaction.RespondAsync(matches);
+        }
+
 
 
         private Command? GetMatchingCommand(string name)
