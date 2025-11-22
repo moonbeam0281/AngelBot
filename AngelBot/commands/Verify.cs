@@ -2,8 +2,8 @@ using AngelBot.Classes;
 using AngelBot.Interfaces;
 using Discord.WebSocket;
 using Discord;
-using System.Security.Cryptography;
 using AngelBot.Handlers;
+using System.Linq;
 
 namespace AngelBot.Commands
 {
@@ -52,7 +52,7 @@ namespace AngelBot.Commands
             // No args -> show status
             if (args.Length == 0)
             {
-                var cfg = VerificationHandler.Instance.GetGuildConfig(guild.Id);
+                var cfg = await VerificationHandler.Instance.GetGuildConfigAsync(guild.Id);
 
                 if (cfg == null)
                 {
@@ -124,9 +124,7 @@ namespace AngelBot.Commands
                 var raw = args[1];
 
                 if (raw.StartsWith("<#") && raw.EndsWith(">"))
-                {
                     raw = raw[2..^1];
-                }
 
                 if (!ulong.TryParse(raw, out var chId))
                 {
@@ -150,8 +148,8 @@ namespace AngelBot.Commands
                 return;
             }
 
-            var existing = VerificationHandler.Instance.GetGuildConfig(guild.Id);
-            VerificationHandler.Instance.SetGuildConfig(
+            var existing = await VerificationHandler.Instance.GetGuildConfigAsync(guild.Id);
+            await VerificationHandler.Instance.SetGuildConfigAsync(
                 guild.Id,
                 channel.Id,
                 existing?.VerificationRoleId,
@@ -172,9 +170,7 @@ namespace AngelBot.Commands
             var raw = args[1];
 
             if (raw.StartsWith("<@&") && raw.EndsWith(">"))
-            {
                 raw = raw[3..^1];
-            }
 
             if (!ulong.TryParse(raw, out var roleId))
             {
@@ -189,8 +185,8 @@ namespace AngelBot.Commands
                 return;
             }
 
-            var existing = VerificationHandler.Instance.GetGuildConfig(guild.Id);
-            VerificationHandler.Instance.SetGuildConfig(
+            var existing = await VerificationHandler.Instance.GetGuildConfigAsync(guild.Id);
+            await VerificationHandler.Instance.SetGuildConfigAsync(
                 guild.Id,
                 existing?.VerificationChannelId,
                 role.Id,
@@ -202,11 +198,11 @@ namespace AngelBot.Commands
 
         private async Task HandleToggle(SocketMessage message, SocketGuild guild)
         {
-            var existing = VerificationHandler.Instance.GetGuildConfig(guild.Id);
+            var existing = await VerificationHandler.Instance.GetGuildConfigAsync(guild.Id);
 
             bool newEnabled = !(existing?.Enabled ?? false);
 
-            VerificationHandler.Instance.SetGuildConfig(
+            await VerificationHandler.Instance.SetGuildConfigAsync(
                 guild.Id,
                 existing?.VerificationChannelId,
                 existing?.VerificationRoleId,
@@ -217,8 +213,6 @@ namespace AngelBot.Commands
                 $"Verification is now {(newEnabled ? "✅ **enabled**" : "❌ **disabled**")}."
             );
         }
-
-
 
         public override async Task Run(SocketSlashCommand interaction, DiscordSocketClient client)
         {
@@ -236,7 +230,7 @@ namespace AngelBot.Commands
                 return;
             }
 
-            var cfg = VerificationHandler.Instance.GetGuildConfig(interaction.GuildId.Value);
+            var cfg = await VerificationHandler.Instance.GetGuildConfigAsync(interaction.GuildId.Value);
             if (cfg == null || !cfg.Enabled || cfg.VerificationRoleId == null)
             {
                 await interaction.RespondAsync(
@@ -251,7 +245,7 @@ namespace AngelBot.Commands
             {
                 await interaction.RespondAsync(
                     "This is not the right channel to use /verify on this server." +
-                    $"The correct channel is <#{cfg.VerificationChannelId}>",
+                    $" The correct channel is <#{cfg.VerificationChannelId}>",
                     ephemeral: true
                 );
                 return;
@@ -272,7 +266,7 @@ namespace AngelBot.Commands
                 return;
             }
 
-            var session = VerificationHandler.Instance.CreateSession(
+            var session = await VerificationHandler.Instance.CreateSessionAsync(
                 interaction.GuildId.Value,
                 interaction.User.Id
             );

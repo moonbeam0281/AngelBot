@@ -13,6 +13,14 @@
     <PackageReference Include="Discord.Net.Interactions" Version="3.18.0" />
     <PackageReference Include="Discord.Net.WebSocket" Version="3.18.0" />
     <PackageReference Include="dotenv.net" Version="4.0.0" />
+    <PackageReference Include="Npgsql" Version="9.0.4" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="database\schemas\**\*.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 
 </Project>

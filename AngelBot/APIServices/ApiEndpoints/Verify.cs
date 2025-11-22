@@ -5,7 +5,6 @@ using AngelBot.Classes;
 using Discord.WebSocket;
 using AngelBot.Handlers;
 using AngelBot.Interfaces;
-using Discord;
 
 namespace AngelBot.APIServices.ApiEndpoints
 {
@@ -35,7 +34,6 @@ namespace AngelBot.APIServices.ApiEndpoints
                     PropertyNameCaseInsensitive = true,
                     NumberHandling = JsonNumberHandling.AllowReadingFromString
                 });
-
             }
             catch
             {
@@ -94,9 +92,9 @@ namespace AngelBot.APIServices.ApiEndpoints
                 return;
             }
 
-            // Get guild verification config (role)
-            var cfg = VerificationHandler.Instance.GetGuildConfig(guild.Id);
-            if (cfg == null || cfg.VerificationRoleId == null)
+            // Get guild verification config (role) from DB/cache
+            var cfg = await VerificationHandler.Instance.GetGuildConfigAsync(guild.Id);
+            if (cfg == null)
             {
                 await Json(ctx.Response, new
                 {
@@ -106,7 +104,20 @@ namespace AngelBot.APIServices.ApiEndpoints
                 return;
             }
 
-            var role = guild.GetRole(cfg.VerificationRoleId.Value);
+            // Prefer the role stored in the session if present, otherwise from config
+            ulong? roleId = session.RoleId ?? cfg.VerificationRoleId;
+
+            if (roleId == null)
+            {
+                await Json(ctx.Response, new
+                {
+                    success = false,
+                    error = "Verification role is not set for this server."
+                }, 500);
+                return;
+            }
+
+            var role = guild.GetRole(roleId.Value);
             if (role == null)
             {
                 await Json(ctx.Response, new

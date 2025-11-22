@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Security.Cryptography;
 using AngelBot.Classes;
+using AngelBot.Database.Repositories;
 
 namespace AngelBot.Handlers
 {
@@ -20,26 +21,39 @@ namespace AngelBot.Handlers
             return Convert.ToHexString(bytes).ToLower();
         }
 
-        public void SetGuildConfig(ulong guildId, ulong? channelId, ulong? roleId, bool enabled = true)
+        // ---------- GUILD CONFIG ----------
+
+        public async Task SetGuildConfigAsync(ulong guildId, ulong? channelId, ulong? roleId, bool enabled)
         {
-            _guildConfigs[guildId] = new VerificationConfig
+            var cfg = new VerificationConfig
             {
                 GuildId = guildId,
                 VerificationChannelId = channelId,
                 VerificationRoleId = roleId,
                 Enabled = enabled
             };
+
+            _guildConfigs[guildId] = cfg;
+            await VerificationRepo.Instance.SaveGuildConfigAsync(cfg);
         }
 
-        public VerificationConfig? GetGuildConfig(ulong guildId)
+        public async Task<VerificationConfig?> GetGuildConfigAsync(ulong guildId)
         {
-            _guildConfigs.TryGetValue(guildId, out var cfg);
-            return cfg;
+            if (_guildConfigs.TryGetValue(guildId, out var cached))
+                return cached;
+
+            var dbCfg = await VerificationRepo.Instance.GetGuildConfigAsync(guildId);
+            if (dbCfg != null)
+                _guildConfigs[guildId] = dbCfg;
+
+            return dbCfg;
         }
 
-        public VerificationSession CreateSession(ulong guildId, ulong userId, ulong? channelId = null)
+        // ---------- SESSIONS ----------
+
+        public async Task<VerificationSession> CreateSessionAsync(ulong guildId, ulong userId, ulong? channelId = null)
         {
-            var config = GetGuildConfig(guildId);
+            var config = await GetGuildConfigAsync(guildId);
 
             var token = GenerateToken(32);
             var session = new VerificationSession

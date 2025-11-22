@@ -1,4 +1,5 @@
 ﻿using AngelBot.APIServices;
+using AngelBot.Database;
 using AngelBot.Handlers;
 using Discord;
 using Discord.WebSocket;
@@ -34,6 +35,8 @@ namespace AngelBot
             Console.WriteLine("Logging into bot using token...");
             await Client.LoginAsync(TokenType.Bot, token);
             var eventHandler = new DiscordEventHandler(Client);
+            Console.WriteLine("[AngelBot] Starting database...");
+            await DatabaseHandler.Instance.ApplySchemasAsync();
             Console.WriteLine("Starting up...");
             await Client.StartAsync();
             Console.WriteLine("Bot is running!");
