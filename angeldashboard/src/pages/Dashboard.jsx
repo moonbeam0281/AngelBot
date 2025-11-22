@@ -1,3 +1,4 @@
+import { Outlet } from "react-router-dom";
 import SideBar from "../components/SideBar";
 import NavBar from "../components/NavBar";
 
@@ -10,8 +11,7 @@ export default function Dashboard() {
                 <NavBar />
 
                 <div className="dashboard-content">
-                    <h1>Welcome to the AngelBot Dashboard ✨</h1>
-                    <p>More panels coming soon...</p>
+                    <Outlet />
                 </div>
             </div>
         </div>
