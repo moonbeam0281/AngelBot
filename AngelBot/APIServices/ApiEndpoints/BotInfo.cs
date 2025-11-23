@@ -1,5 +1,6 @@
 using System.Net;
 using AngelBot.Classes;
+using AngelBot.Handlers;
 using AngelBot.Interfaces;
 using Discord.WebSocket;
 
@@ -42,6 +43,8 @@ namespace AngelBot.APIServices.ApiEndpoints
                 bannerUrl = $"https://cdn.discordapp.com/banners/{botUser.Id}/{bannerHash}.{bannerExt}?size=600";
             }
 
+            var commands = DiscordEventHandler.CommandList.Select(c => c.Info);
+
             await Json(ctx.Response, new
             {
                 ok = true,
@@ -53,7 +56,8 @@ namespace AngelBot.APIServices.ApiEndpoints
                     banner = bannerUrl,
                     serverCount = client.Guilds.Count,
                     status = client.ConnectionState.ToString(),
-                    usersCount = client.Guilds.Sum(g => g.MemberCount)
+                    usersCount = client.Guilds.Sum(g => g.MemberCount),
+                    commands
                 }
             });
         }

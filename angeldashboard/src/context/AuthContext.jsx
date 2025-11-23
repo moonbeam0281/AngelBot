@@ -1,4 +1,3 @@
-// src/context/AuthContext.jsx
 import { createContext, useContext, useEffect, useState } from "react";
 import CONFIG from "../config";
 import {
@@ -17,6 +16,7 @@ function normalizeUser(raw) {
         username: raw.username ?? raw.Username ?? "",
         discriminator: raw.discriminator ?? raw.Discriminator ?? "0",
         avatar: raw.avatar ?? raw.Avatar ?? null,
+        commonGuilds: raw.commonGuilds ?? raw.CommonGuilds ?? []
     };
 }
 
@@ -35,7 +35,8 @@ export function AuthProvider({ children }) {
                 if (cancelled) return;
 
                 if (res.success && res.data?.ok) {
-                    const normalised = normalizeUser(res.data.user)
+                    const normalised = normalizeUser(res.data.user);
+                    console.log(normalised);
                     setUser(normalised);
                 } else {
                     setUser(null);

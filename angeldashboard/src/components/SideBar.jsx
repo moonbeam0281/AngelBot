@@ -52,10 +52,7 @@ export default function SideBar() {
             </div>
 
             <div className="sidebar-footer">
-                {!collapsed && <span className="sidebar-status">
-                    <span className={`status-dot ${botInfo?.status === "Connected" ? "online" : "offline"}`}></span>
-                    {botInfo?.status}
-                </span>}
+                
                 <button
                     className="sidebar-toggle-btn"
                     onClick={() => setCollapsed(prev => !prev)}

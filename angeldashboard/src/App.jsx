@@ -10,7 +10,7 @@ import Verify from "./pages/Verify.jsx";
 import Guilds from "./components/dashboard/Guilds.jsx";
 import Commands from "./components/dashboard/Commands.jsx";
 import Settings from "./components/dashboard/Settings.jsx";
-import DashboardItems from "./components/DashboardItems.jsx"
+import DashboardHome from "./components/dashboard/DashboardHome.jsx";
 
 function ProtectedRoute({ children }) {
   const { isAuth, loading } = useAuth();
@@ -33,7 +33,7 @@ export default function App() {
             <ProtectedRoute>
               <Dashboard />
             </ProtectedRoute>}>
-            <Route index element={<DashboardItems />} />
+            <Route index element={<DashboardHome />} />
             <Route path="guilds" element={<Guilds />} />
             <Route path="commands" element={<Commands />} />
             <Route path="settings" element={<Settings />} />

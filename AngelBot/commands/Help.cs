@@ -20,14 +20,11 @@ namespace AngelBot.Commands
         })
         { }
 
-        private readonly string[] hiddenCommands = ["any"];
-
         private async Task SendHelpEmbeds(IMessageChannel channel, SocketUser author, DiscordSocketClient client)
         {
             var commandList = DiscordEventHandler.CommandList
                 .Cast<Command>()
-                .Where(x => !hiddenCommands.Any(y => x.Info.Aliases.Contains(y)))
-                .ToList();
+                .Where(x => x.Info.VisibleInHelp).ToList();
 
             var listingBuild = new ListingBuilder<Command>(commandList, (range, info) =>
             {

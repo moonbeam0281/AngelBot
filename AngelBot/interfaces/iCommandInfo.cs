@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Discord;
 
 namespace AngelBot.Interfaces
@@ -9,9 +10,11 @@ namespace AngelBot.Interfaces
         public string[] Aliases { get; init; } = [];
         public Color Color { get; init; } = new Color(255, 255, 255);
 
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public SlashScope Scope { get; init; } = SlashScope.Global;
 
         // Category (e.g. Fun, Admin, Utility)
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public CommandCategory Category { get; init; }
 
         // Usage examples

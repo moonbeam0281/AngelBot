@@ -43,6 +43,7 @@ namespace AngelBot.Classes
                 username = user.Username,
                 discriminator = user.Discriminator,
                 avatar = user.Avatar,
+                commonGuilds = user.CommonGuilds,
                 iat = now.ToUnixTimeSeconds(),
                 exp = now.Add(lifetime).ToUnixTimeSeconds()
             };
@@ -110,6 +111,33 @@ namespace AngelBot.Classes
                 avatar = av.GetString();
             }
 
+            List<CommonGuild> commonList = [];
+
+            if (root.TryGetProperty("commonGuilds", out var cgProp) &&
+                cgProp.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var elem in cgProp.EnumerateArray())
+                {
+                    var guildid = elem.GetProperty("GuildId").GetString();
+                    var name = elem.GetProperty("GuildName").GetString();
+
+                    elem.TryGetProperty("GuildAvatar", out var avatarProp);
+                    elem.TryGetProperty("GuildBanner", out var bannerProp);
+                    elem.TryGetProperty("Permission", out var permProp);
+
+                    commonList.Add(new CommonGuild
+                    {
+                        GuildId = guildid!,
+                        GuildName = name!,
+                        GuildAvatar = avatarProp.GetString(),
+                        GuildBanner = bannerProp.GetString(),
+                        Permission = Enum.TryParse<GuildPermission>(permProp.GetString(), out var p)
+                            ? p
+                            : GuildPermission.CommonUser
+                    });
+                }
+            }
+
             if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(username)) return false;
 
             user = new DashboardUser
@@ -117,7 +145,8 @@ namespace AngelBot.Classes
                 Id = id,
                 Username = username,
                 Discriminator = discriminator ?? "0",
-                Avatar = avatar
+                Avatar = avatar,
+                CommonGuilds = commonList
             };
 
             return true;

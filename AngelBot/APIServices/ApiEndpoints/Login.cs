@@ -25,7 +25,8 @@ namespace AngelBot.APIServices.ApiEndpoints
             var url = $"https://discord.com/api/oauth2/authorize" +
                       $"?client_id={clientId}" +
                       $"&redirect_uri={WebUtility.UrlEncode(redirectUri)}" +
-                      $"&response_type=code&scope=identify";
+                      $"&response_type=code" +
+                      $"&scope={WebUtility.UrlEncode("identify guilds")}";
 
             ctx.Response.Redirect(url);
             ctx.Response.Close();
