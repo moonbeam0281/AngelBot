@@ -24,7 +24,7 @@ export default function Login() {
         const code = params.get("code");
 
         if (isAuth) {
-            navigate("/dashboard", { replace: true });
+            //navigate("/dashboard", { replace: true });
             return;
         }
 
@@ -53,6 +53,7 @@ export default function Login() {
         return (
             <div className="login-root">
                 <div className="login-card">
+                    <div className="login-loading-orb" />
                     <h1 className="login-title">Angel Dashboard</h1>
                     <p>Checking session...</p>
                 </div>
@@ -63,10 +64,12 @@ export default function Login() {
     return (
         <div className="login-root">
             <div className="login-card">
+                <div className="login-glow" />
+
                 <h1 className="login-title">Angel Dashboard</h1>
 
-                {authLoading && <p>Connecting to Discord...</p>}
-                {error && <p style={{ color: "salmon" }}>Error: {error}</p>}
+                {authLoading && <p className="login-status">Connecting to Discord...</p>}
+                {error && <p className="login-error">Error: {error}</p>}
 
                 {!isAuth && !authLoading && (
                     <>
@@ -75,10 +78,10 @@ export default function Login() {
                         </p>
                         <button
                             className="login-discord-btn"
-                            onClick={startDiscordLogin}
+                            onClick={handleLogin}
                         >
                             <span className="login-discord-icon">💠</span>
-                            <span>Login with Discord</span>
+                            Login with Discord
                         </button>
                     </>
                 )}
@@ -86,8 +89,8 @@ export default function Login() {
                 {isAuth && !authLoading && (
                     <>
                         <p className="login-subtitle">
-                            You are already logged in as{" "}
-                            <strong>{user?.username}</strong>.
+                            You’re already logged in as{" "}
+                            <strong className="login-username">{user?.username}</strong>.
                         </p>
                         <button
                             className="login-discord-btn"

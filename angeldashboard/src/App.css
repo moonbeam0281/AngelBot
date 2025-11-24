@@ -1,99 +1,96 @@
 /* Fullscreen container */
+/* === LANDING PAGE === */
+
 .landing-root {
+    position: relative;
     min-height: 100vh;
     width: 100%;
-    background: radial-gradient(circle at top, #1b2238, #050716 60%, #02030a);
-    color: #f5f5ff;
+    overflow: hidden;
+    background: radial-gradient(circle at top, #050716, #02030a 60%);
+    color: var(--text-main);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+}
+
+/* Foreground layer above the canvas */
+.landing-overlay {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    overflow: hidden;
-    position: relative;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    padding: 40px 24px 26px;
 }
 
-/* Angel background zone */
-.landing-bg {
-    flex: 1;
+/* Hero section (center text) */
+.landing-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+    margin-top: 40px;
+}
+
+.landing-logo-circle {
+    width: 72px;
+    height: 72px;
+    border-radius: 999px;
+    border: 2px solid rgba(191, 229, 255, 0.6);
+    background: radial-gradient(circle at top, #8fd5ff, #08101c);
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
+    font-size: 2rem;
+    box-shadow: 0 0 28px rgba(143, 213, 255, 0.5);
 }
 
-/* Subtle floating glow behind text (could be Angel silhouette later) */
-.landing-bg::before {
-    content: "";
-    position: absolute;
-    width: 380px;
-    height: 380px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(135, 206, 255, 0.9), rgba(135, 206, 255, 0));
-    filter: blur(8px);
-    opacity: 0.7;
-    animation: pulse-glow 6s ease-in-out infinite;
-}
-
-.landing-angel-title {
-    text-align: center;
-    z-index: 1;
-}
-
-.landing-angel-title h1 {
-    font-size: clamp(3rem, 5vw, 4.5rem);
-    letter-spacing: 0.15em;
+.landing-title {
+    font-size: clamp(2.8rem, 5vw, 3.8rem);
+    letter-spacing: 0.16em;
     text-transform: uppercase;
-    margin-bottom: 0.6rem;
+    margin: 10px 0 4px;
 }
 
-.landing-angel-title p {
-    font-size: 1.05rem;
-    opacity: 0.8;
+.landing-subtitle {
+    max-width: 520px;
+    font-size: 0.98rem;
+    opacity: 0.85;
 }
 
-/* Bottom glow area */
-.landing-bottom-glow {
+/* Bottom area with arrow + bubble */
+.landing-bottom {
     position: relative;
-    height: 140px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.landing-arrow {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+    animation: arrow-bounce 1.8s infinite;
+}
+
+.landing-login-shell {
+    position: relative;
+    height: 120px;
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    background: linear-gradient(to Top, rgba(4, 8, 20, 0.95), rgba(4, 8, 20, 0));
 }
 
-.landing-bottom-glow::before {
-    content: "";
-    position: absolute;
-    bottom: -60px;
-    width: 90%;
-    height: 140px;
-    border-radius: 50%;
-    background: radial-gradient(circle at center, rgba(135, 206, 255, 0.45), transparent 60%);
-    filter: blur(18px);
-    opacity: 0.7;
-}
-
-/* Arrow hint */
-.landing-arrow {
-    margin-top: 12px;
-    font-size: 1.8rem;
-    animation: arrow-bounce 1.8s infinite;
-    z-index: 1;
-}
-
-/* Login bubble */
+/* Pop-up bubble */
 .landing-login-bubble {
-    position: absolute;
-    top: -110px;
     padding: 14px 18px;
     border-radius: 14px;
     background: rgba(7, 11, 25, 0.96);
     box-shadow: 0 0 18px rgba(135, 206, 255, 0.4);
     border: 1px solid rgba(135, 206, 255, 0.5);
-    max-width: 320px;
+    max-width: 340px;
     text-align: center;
     cursor: pointer;
-    z-index: 2;
     animation: bubble-pop 0.18s ease-out;
 }
 
@@ -101,125 +98,123 @@
     margin: 3px 0;
 }
 
-.landing-login-bubble .username {
+.landing-username {
     font-weight: 600;
     color: #8fd5ff;
 }
 
-.login-cta {
-    font-size: 0.95rem;
-    opacity: 0.9;
-}
-
-.login-btn {
-    margin-top: 8px;
-    padding: 6px 14px;
-    border-radius: 999px;
-    border: none;
-    background: linear-gradient(135deg, #7dd8ff, #c1a3ff);
-    color: #050716;
-    font-weight: 600;
-    cursor: pointer;
-    font-size: 0.9rem;
-}
-
-.login-btn:hover {
-    filter: brightness(1.08);
-}
-
-/* Animations */
-@keyframes arrow-bounce {
-
-    0%,
-    100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(6px);
-    }
-}
-
-@keyframes pulse-glow {
-
-    0%,
-    100% {
-        transform: scale(1);
-        opacity: 0.65;
-    }
-
-    50% {
-        transform: scale(1.08);
-        opacity: 0.9;
-    }
-}
-
-@keyframes bubble-pop {
-    from {
-        transform: translateY(8px) scale(0.9);
-        opacity: 0;
-    }
-
-    to {
-        transform: translateY(0) scale(1);
-        opacity: 1;
-    }
-}
-
-/* Loading */
-.app-loading {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #050716;
-    color: #f5f5ff;
-}
+/* === LOGIN SCREEN === */
 
 .login-root {
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
     background: radial-gradient(circle at top, #1b2238, #050716 60%, #02030a);
-    color: #dbe9ff;
+    color: var(--text-main);
+    position: relative;
 }
 
+/* Card container */
 .login-card {
-    background: rgba(12, 18, 34, 0.85);
-    padding: 30px 40px;
-    border-radius: 12px;
-    border: 1px solid rgba(135, 206, 255, 0.25);
-    box-shadow: 0 0 20px rgba(135, 206, 255, 0.2);
+    background: rgba(12, 18, 34, 0.88);
+    padding: 40px 50px;
+    border-radius: 16px;
+    border: 1px solid rgba(135, 206, 255, 0.35);
+    box-shadow: 0 0 30px rgba(135, 206, 255, 0.25);
     text-align: center;
-    width: 330px;
+    min-width: 340px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Floating glow ring behind the title */
+.login-glow {
+    position: absolute;
+    top: -80px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(135, 206, 255, 0.6), transparent 70%);
+    filter: blur(40px);
+    z-index: 0;
+    animation: login-glow-pulse 4s ease-in-out infinite;
+}
+@keyframes login-glow-pulse {
+    0%, 100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+    50% { opacity: 1; transform: translateX(-50%) scale(1.15); }
 }
 
 .login-title {
-    font-size: 1.8rem;
-    margin-bottom: 15px;
+    font-size: 2rem;
     color: #8fd5ff;
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 2;
 }
 
 .login-subtitle {
-    margin-bottom: 20px;
     opacity: 0.85;
+    margin-bottom: 22px;
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 2;
 }
 
+.login-status {
+    opacity: 0.8;
+}
+
+.login-error {
+    color: #ff9b9b;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
+.login-username {
+    color: #bfe5ff;
+    font-weight: 600;
+}
+
+/* Login button */
 .login-discord-btn {
     background: linear-gradient(135deg, #7dd8ff, #b596ff);
     border: none;
     width: 100%;
-    padding: 10px;
-    border-radius: 8px;
+    padding: 12px;
+    border-radius: 10px;
     cursor: pointer;
     font-weight: 600;
     color: #050716;
     font-size: 1rem;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 0 10px rgba(135, 206, 255, 0.3);
+    position: relative;
+    z-index: 2;
 }
 
 .login-discord-btn:hover {
     filter: brightness(1.1);
+    box-shadow: 0 0 16px rgba(135, 206, 255, 0.45);
+}
+
+/* Cute orb for loading */
+.login-loading-orb {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7dd8ff, #b596ff);
+    animation: orb-spin 1.4s linear infinite;
+}
+
+@keyframes orb-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
 .dashboard-container {
@@ -567,43 +562,53 @@
 /* Category color palette — soft AngelBot theme */
 
 .category-General {
-    color: #8fd5ff; /* soft blue */
+    color: #8fd5ff;
+    /* soft blue */
 }
 
 .category-Utility {
-    color: #7df4c8; /* mint */
+    color: #7df4c8;
+    /* mint */
 }
 
 .category-Fun {
-    color: #ffb8f1; /* pink */
+    color: #ffb8f1;
+    /* pink */
 }
 
 .category-Moderation {
-    color: #ff9b9b; /* light red */
+    color: #ff9b9b;
+    /* light red */
 }
 
 .category-Management {
-    color: #d8b4ff; /* violet */
+    color: #d8b4ff;
+    /* violet */
 }
 
 .category-Music {
-    color: #ffd27f; /* warm gold */
+    color: #ffd27f;
+    /* warm gold */
 }
 
 .category-Security {
-    color: #f77676; /* stronger red */
+    color: #f77676;
+    /* stronger red */
 }
 
 .category-Information {
-    color: #98c8ff; /* icy blue */
+    color: #98c8ff;
+    /* icy blue */
 }
 
 .category-Developer {
-    color: #b1a8ff; /* lavender */
+    color: #b1a8ff;
+    /* lavender */
 }
 
 .category-Owenr {
-    color: #ffc37c; /* orange-gold */
+    color: #ffc37c;
+    /* orange-gold */
 }
 
 .dashhome {
@@ -667,7 +672,7 @@
 /* Stats grid */
 .dashhome-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(170px,1fr));
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
     gap: 16px;
 }
 
@@ -730,4 +735,94 @@
     background: rgba(10, 18, 32, 0.95);
     border: 1px solid rgba(135, 206, 255, 0.35);
     font-size: 0.8rem;
+}
+
+.guild-card {
+    position: relative;
+    width: 260px;
+    height: 170px;
+    background-size: cover;
+    background-position: center;
+    border: 2px solid white;
+    border-radius: 14px;
+    overflow: visible;
+    padding-top: 40px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+
+.guild-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+}
+
+.guild-card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom,
+            rgba(0, 0, 0, 0.1),
+            rgba(0, 0, 0, 0.7));
+}
+
+/* Avatar circle */
+.guild-card-avatar-wrapper {
+    position: absolute;
+    top: -30px;
+    /* overlap by 30% */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+}
+
+.guild-card-avatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 3px solid #ffffffcc;
+    background: #0a0f18;
+}
+
+/* Info zone */
+.guild-card-info {
+    position: absolute;
+    bottom: 12px;
+    width: 100%;
+    text-align: center;
+    z-index: 15;
+    color: white;
+}
+
+.guild-card-name {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.guild-card-id {
+    font-size: 0.7rem;
+    opacity: 0.8;
+}
+
+.guild-card-perm {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.perm-Owner {
+    background: #ffd70033;
+    color: #ffd700;
+}
+
+.perm-AdminPermissions {
+    background: #4da6ff33;
+    color: #4da6ff;
+}
+
+.perm-CommonUser {
+    background: #4dff8833;
+    color: #4dff88;
 }

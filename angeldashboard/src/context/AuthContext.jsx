@@ -11,12 +11,22 @@ const AuthContext = createContext(null);
 function normalizeUser(raw) {
     if (!raw) return null;
 
+    const rawGuilds = raw.commonGuilds ?? raw.CommonGuilds ?? [];
+
+    const commonGuilds = rawGuilds.map(g => ({
+        guildId: g.guildId ?? g.GuildId ?? "",
+        guildName: g.guildName ?? g.GuildName ?? "",
+        guildAvatar: g.guildAvatar ?? g.GuildAvatar ?? null,
+        guildBanner: g.guildBanner ?? g.GuildBanner ?? null,
+        permission: g.permission ?? g.Permission ?? "CommonUser"
+    }));
+
     return {
         id: raw.id ?? raw.Id ?? null,
         username: raw.username ?? raw.Username ?? "",
         discriminator: raw.discriminator ?? raw.Discriminator ?? "0",
         avatar: raw.avatar ?? raw.Avatar ?? null,
-        commonGuilds: raw.commonGuilds ?? raw.CommonGuilds ?? []
+        commonGuilds
     };
 }
 
@@ -36,7 +46,6 @@ export function AuthProvider({ children }) {
 
                 if (res.success && res.data?.ok) {
                     const normalised = normalizeUser(res.data.user);
-                    console.log(normalised);
                     setUser(normalised);
                 } else {
                     setUser(null);
