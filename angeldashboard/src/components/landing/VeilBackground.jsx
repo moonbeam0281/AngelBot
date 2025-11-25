@@ -1,6 +1,5 @@
-import { useRef, useEffect } from 'react';
-import { Renderer, Program, Mesh, Triangle, Vec2 } from 'ogl';
-import './DarkVeil.css';
+import { useRef, useEffect } from "react";
+import { Renderer, Program, Mesh, Triangle, Vec2 } from "ogl";
 
 const vertex = `
 attribute vec2 position;
@@ -81,16 +80,19 @@ export default function VeilBackground({
     speed = 0.5,
     scanlineFrequency = 0,
     warpAmount = 0,
-    resolutionScale = 1
+    resolutionScale = 1,
 }) {
     const ref = useRef(null);
+
     useEffect(() => {
         const canvas = ref.current;
+        if (!canvas) return;
+
         const parent = canvas.parentElement;
 
         const renderer = new Renderer({
             dpr: Math.min(window.devicePixelRatio, 2),
-            canvas
+            canvas,
         });
 
         const gl = renderer.gl;
@@ -106,32 +108,34 @@ export default function VeilBackground({
                 uNoise: { value: noiseIntensity },
                 uScan: { value: scanlineIntensity },
                 uScanFreq: { value: scanlineFrequency },
-                uWarp: { value: warpAmount }
-            }
+                uWarp: { value: warpAmount },
+            },
         });
 
         const mesh = new Mesh(gl, { geometry, program });
 
         const resize = () => {
-            const w = parent.clientWidth,
-                h = parent.clientHeight;
+            const w = parent.clientWidth;
+            const h = parent.clientHeight;
             renderer.setSize(w * resolutionScale, h * resolutionScale);
             program.uniforms.uResolution.value.set(w, h);
         };
 
-        window.addEventListener('resize', resize);
+        window.addEventListener("resize", resize);
         resize();
 
         const start = performance.now();
         let frame = 0;
 
         const loop = () => {
-            program.uniforms.uTime.value = ((performance.now() - start) / 1000) * speed;
+            const t = (performance.now() - start) / 1000;
+            program.uniforms.uTime.value = t * speed;
             program.uniforms.uHueShift.value = hueShift;
             program.uniforms.uNoise.value = noiseIntensity;
             program.uniforms.uScan.value = scanlineIntensity;
             program.uniforms.uScanFreq.value = scanlineFrequency;
             program.uniforms.uWarp.value = warpAmount;
+
             renderer.render({ scene: mesh });
             frame = requestAnimationFrame(loop);
         };
@@ -140,8 +144,27 @@ export default function VeilBackground({
 
         return () => {
             cancelAnimationFrame(frame);
-            window.removeEventListener('resize', resize);
+            window.removeEventListener("resize", resize);
         };
-    }, [hueShift, noiseIntensity, scanlineIntensity, speed, scanlineFrequency, warpAmount, resolutionScale]);
-    return <canvas ref={ref} className="darkveil-canvas" />;
+    }, [
+        hueShift,
+        noiseIntensity,
+        scanlineIntensity,
+        speed,
+        scanlineFrequency,
+        warpAmount,
+        resolutionScale,
+    ]);
+
+    return (
+        <canvas
+            ref={ref}
+            className="
+                pointer-events-none
+                absolute inset-0
+                block
+                h-full w-full
+            "
+        />
+    );
 }

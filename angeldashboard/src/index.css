@@ -1,10 +1,15 @@
+@import "tailwindcss";
+
+/* ==== THEMES ==== */
+
+/* Default + explicit dark theme */
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
-  /* ANGELBOT THEME */
-  --bg-main: #08101c;
+  /* Dark Angel theme */
+  --bg-main: #050716;
   --bg-panel: #0b111f;
   --bg-soft: rgba(12, 18, 34, 0.9);
   --accent: #8fd5ff;
@@ -20,6 +25,34 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+:root[data-theme="dark"] {
+  --bg-main: #050716;
+  --bg-panel: #0b111f;
+  --bg-soft: rgba(12, 18, 34, 0.9);
+  --accent: #8fd5ff;
+  --accent-soft: #bfe5ff;
+  --text-main: #dbe9ff;
+  color-scheme: dark;
+}
+
+/* Light pastel theme */
+:root[data-theme="light"] {
+  --bg-main: #fff9f2;
+  /* warm off-white */
+  --bg-panel: #ffeef7;
+  /* soft pink panel */
+  --bg-soft: rgba(255, 249, 242, 0.9);
+  --accent: #ffb347;
+  /* soft yellow/orange */
+  --accent-soft: #ff9ad5;
+  /* pastel pink */
+  --text-main: #3b2b4a;
+  /* gentle purple-brown */
+  color-scheme: light;
+}
+
+/* ==== GLOBAL RESET ==== */
+
 *,
 *::before,
 *::after {
@@ -30,4 +63,176 @@ body {
   margin: 0;
   background: var(--bg-main);
   color: var(--text-main);
+}
+
+/* ==== ANIMATIONS ==== */
+
+@keyframes bubble-pop {
+  0% {
+    transform: translateY(6px) scale(0.95);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes login-glow-pulse {
+
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: translateX(-50%) scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.15);
+  }
+}
+
+@keyframes orb-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==== CATEGORY COLORS (Commands page) ==== */
+
+.category-General {
+  color: #8fd5ff;
+}
+
+.category-Utility {
+  color: #7df4c8;
+}
+
+.category-Fun {
+  color: #ffb8f1;
+}
+
+.category-Moderation {
+  color: #ff9b9b;
+}
+
+.category-Management {
+  color: #d8b4ff;
+}
+
+.category-Music {
+  color: #ffd27f;
+}
+
+.category-Security {
+  color: #f77676;
+}
+
+.category-Information {
+  color: #98c8ff;
+}
+
+.category-Developer {
+  color: #b1a8ff;
+}
+
+.category-Owenr {
+  color: #ffc37c;
+}
+
+
+@keyframes angel-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Animated gradient title for AngelBot */
+.angel-gradient-text {
+  background-image: linear-gradient(120deg,
+      var(--accent-soft),
+      #ff9ad5,
+      #ffd27f,
+      var(--accent-soft));
+  background-size: 200% 200%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: angel-gradient 8s ease-in-out infinite;
+}
+
+@keyframes angel-gradient-move {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes angel-pulse {
+  0% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+
+  25% {
+    opacity: 0.9;
+    transform: scale(1.08);
+  }
+
+  50% {
+    opacity: 0.9;
+    transform: scale(1.08);
+  }
+
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+}
+
+/* Login glow pulse */
+@keyframes login-glow {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.15); }
+}
+
+.angel-button-label {
+  transition: background 0.35s ease, color 0.35s ease;
+}
+
+/* On button hover, make the label text gradient like the header */
+.angel-button:hover .angel-button-label {
+  background-image: linear-gradient(120deg,
+      var(--accent-soft),
+      #ff9ad5,
+      #ffd27f,
+      var(--accent-soft));
+  background-size: 200% 200%;
+  background-position: 50% 50%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+@keyframes angel-card-pulse {
+  0%, 100% {
+    opacity: 0.25;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.03);
+  }
 }

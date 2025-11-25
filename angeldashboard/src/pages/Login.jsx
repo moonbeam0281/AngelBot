@@ -14,8 +14,12 @@ export default function Login() {
     const [error, setError] = useState("");
     const [authLoading, setAuthLoading] = useState(false);
     const navigate = useNavigate();
-
     const handledCodeRef = useRef(false);
+
+    const handleLogin = () => {
+        setError("");
+        startDiscordLogin();
+    };
 
     useEffect(() => {
         if (loading) return;
@@ -24,7 +28,7 @@ export default function Login() {
         const code = params.get("code");
 
         if (isAuth) {
-            //navigate("/dashboard", { replace: true });
+            // navigate("/dashboard", { replace: true });
             return;
         }
 
@@ -46,57 +50,118 @@ export default function Login() {
             .finally(() => {
                 setAuthLoading(false);
             });
-
     }, [loading, isAuth, completeLogin, navigate]);
 
     if (loading) {
         return (
-            <div className="login-root">
-                <div className="login-card">
-                    <div className="login-loading-orb" />
-                    <h1 className="login-title">Angel Dashboard</h1>
-                    <p>Checking session...</p>
+            <div className="min-h-screen flex items-center justify-center bg-bg-main text-text-main">
+                <div className="angel-card w-[340px] text-center">
+
+                    <div className="mx-auto mb-6 h-10 w-10 rounded-full 
+                        bg-linear-to-br from-accent to-accent-soft
+                        animate-[orb-spin_1.4s_linear_infinite]"
+                    />
+
+                    <h1 className="text-3xl angel-gradient-text mb-2">
+                        Angel Dashboard
+                    </h1>
+
+                    <p className="opacity-80 text-sm">Checking session...</p>
                 </div>
             </div>
         );
     }
 
+    // ----------------------------
+    // Login Panel
+    // ----------------------------
     return (
-        <div className="login-root">
-            <div className="login-card">
-                <div className="login-glow" />
+        <div className="min-h-screen flex items-center justify-center bg-bg-main text-text-main relative">
 
-                <h1 className="login-title">Angel Dashboard</h1>
+            <div className="angel-card w-[340px] text-center relative">
 
-                {authLoading && <p className="login-status">Connecting to Discord...</p>}
-                {error && <p className="login-error">Error: {error}</p>}
+                {/* Pulsing glow behind title */}
+                <div
+                    className="
+                        pointer-events-none absolute -top-20 left-1/2
+                        h-[180px] w-[180px]
+                        -translate-x-1/2
+                        rounded-full
+                        bg-[radial-gradient(circle,var(--accent-soft),transparent_70%)]
+                        blur-[55px]
+                        animate-[login-glow_5s_ease-in-out_infinite]
+                    "
+                />
 
+                <h1 className="text-3xl angel-gradient-text mb-4 relative z-10">
+                    Angel Dashboard
+                </h1>
+
+                {/* Loading text */}
+                {authLoading && (
+                    <p className="relative z-10 text-sm opacity-80 mb-3">
+                        Connecting to Discord...
+                    </p>
+                )}
+
+                {/* Error */}
+                {error && (
+                    <p className="relative z-10 text-sm text-[#ff9b9b] mb-3">
+                        Error: {error}
+                    </p>
+                )}
+
+                {/* Login Button */}
                 {!isAuth && !authLoading && (
                     <>
-                        <p className="login-subtitle">
+                        <p className="relative z-10 opacity-85 mb-6 text-[0.95rem]">
                             Log in with your Discord account to manage AngelBot.
                         </p>
+
                         <button
-                            className="login-discord-btn"
+                            type="button"
                             onClick={handleLogin}
+                            className="
+                                angel-button w-full py-3 rounded-xl
+                                bg-accent text-bg-main font-semibold
+                                flex items-center justify-center gap-2
+                                shadow-angel-soft
+                                transition
+                                hover:shadow-angel-strong
+                                cursor-pointer
+                            "
                         >
-                            <span className="login-discord-icon">💠</span>
-                            Login with Discord
+                            <span>💠</span>
+                            <span className="angel-button-label">Login with Discord</span>
                         </button>
                     </>
                 )}
 
+                {/* Already logged in */}
                 {isAuth && !authLoading && (
                     <>
-                        <p className="login-subtitle">
+                        <p className="relative z-10 opacity-85 mb-6 text-[0.95rem]">
                             You’re already logged in as{" "}
-                            <strong className="login-username">{user?.username}</strong>.
+                            <strong className="text-accent-soft font-semibold">
+                                {user?.username}
+                            </strong>.
                         </p>
+
                         <button
-                            className="login-discord-btn"
+                            type="button"
                             onClick={() => navigate("/dashboard")}
+                            className="
+                                angel-button w-full py-3 rounded-xl
+                                bg-accent text-bg-main font-semibold
+                                flex items-center justify-center gap-2
+                                shadow-angel-soft
+                                transition
+                                hover:shadow-angel-strong
+                                cursor-pointer
+                            "
                         >
-                            Go to Dashboard
+                            <span>💠</span>
+                            <span className="angel-button-label">Go to Dashboard</span>
                         </button>
                     </>
                 )}
