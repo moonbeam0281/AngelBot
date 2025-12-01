@@ -1,22 +1,37 @@
+/** @type {import('tailwindcss').Config} */
 export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,jsx,ts,tsx}",
+  ],
+  darkMode: "class",
   theme: {
     extend: {
-      colors: {
-        "bg-main": "var(--bg-main)",
-        "bg-panel": "var(--bg-panel)",
-        "bg-soft": "var(--bg-soft)",
-        accent: "var(--accent)",
-        "accent-soft": "var(--accent-soft)",
-        "text-main": "var(--text-main)",
+      fontFamily: {
+        display: ["'Poppins'", "system-ui", "sans-serif"],
+        sans: ["'Inter'", "system-ui", "sans-serif"],
       },
-      boxShadow: {
-        "angel-soft": "0 0 14px rgba(143, 213, 255, 0.35)",
-        "angel-strong": "0 0 26px rgba(143, 213, 255, 0.55)",
-        "angel-inner": "inset 0 0 18px rgba(8, 16, 28, 0.9)",
+      keyframes: {
+        "float": {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-8px)" },
+        },
+        "pulse-soft": {
+          "0%, 100%": { opacity: 0.7 },
+          "50%": { opacity: 1 },
+        },
+        "gradient-x": {
+          "0%, 100%": { "background-position": "0% 50%" },
+          "50%": { "background-position": "100% 50%" },
+        },
       },
-      borderRadius: {
-        pill: "999px",
+      animation: {
+        float: "float 4s ease-in-out infinite",
+        "pulse-soft": "pulse-soft 3s ease-in-out infinite",
+        "gradient-x": "gradient-x 8s ease infinite",
+        "spin-slow": "spin 10s linear infinite",
       },
     },
   },
+  plugins: [],
 };

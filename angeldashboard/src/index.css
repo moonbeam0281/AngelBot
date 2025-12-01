@@ -1,71 +1,189 @@
 @import "tailwindcss";
 
-/* ==== THEMES ==== */
+/* ==== BASE LAYER ==== */
+@layer base {
+  /* THEMES + GLOBAL TOKENS */
 
-/* Default + explicit dark theme */
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  :root {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter", "Avenir",
+      Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
 
-  /* Dark Angel theme */
-  --bg-main: #050716;
-  --bg-panel: #0b111f;
-  --bg-soft: rgba(12, 18, 34, 0.9);
-  --accent: #8fd5ff;
-  --accent-soft: #bfe5ff;
-  --text-main: #dbe9ff;
+    /* Dark Angel theme (defaults) */
+    --bg-main: radial-gradient(circle at top, #020617, #050716);
+    --bg-panel: #0b111f;
+    --bg-soft: rgba(12, 18, 34, 0.9);
+    --accent: #8fd5ff;
+    --accent-soft: #bfe5ff;
+    --text-main: #dbe9ff;
 
-  color-scheme: dark;
-  color: var(--text-main);
-  background-color: var(--bg-main);
+    --angel-gradient: linear-gradient(120deg,
+        #eeff00,
+        #f7b5fd,
+        #f8e538);
+    --angel-gradient-soft: linear-gradient(120deg,
+        var(--accent-soft),
+        #ff9ad5,
+        #ffd27f,
+        var(--accent-soft));
 
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    --angel-border-soft: rgba(193, 210, 233, 0.4);
+    --angel-shadow-strong: 0 18px 45px rgba(15, 23, 42, 0.9);
+
+    color-scheme: dark;
+    color: var(--text-main);
+    background-color: var(--bg-main);
+
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Dark theme override */
+  :root[data-theme="dark"] {
+    --bg-main: radial-gradient(circle at top,
+        #3a2174,
+        #162d5e,
+        #0b2c2e);
+    --bg-panel: #020617;
+    --bg-soft: rgba(15, 23, 42, 0.92);
+    --accent: #8fd5ff;
+    --accent-soft: #bfe5ff;
+    --text-main: #e2e8f0;
+    --text-muted: #afafaf;
+
+    --btn-bg-primary: #3b82f6;
+    --btn-bg-primary-hover: #60a5fa;
+    --btn-text-primary: #ffffff;
+
+    --btn-border-primary: #8fd5ff;
+    --btn-border-soft: rgba(143, 213, 255, 0.4);
+
+    --btn-gradient-border: linear-gradient(120deg, #f472b6, #c084fc, #38bdf8);
+    --btn-shadow: 0 0 20px rgba(143, 192, 255, 0.3);
+
+    --angel-gradient: linear-gradient(120deg,
+        #fb71dd,
+        #f2fdb5,
+        #38bdf8);
+    --angel-gradient-soft: linear-gradient(120deg,
+        #c4b5fd,
+        #f9a8d4,
+        #fde68a,
+        #c4b5fd);
+    --angel-gradient-guild-o: linear-gradient(120deg,
+        #0596da77,
+        #00000000,
+        #00000000,
+        #eeff0357,
+        #dfeb3b);
+    --angel-gradient-guild-a: linear-gradient(120deg,
+        #0596da77,
+        #00000000,
+        #00000000,
+        #0314ff57,
+        #3b4deb);
+    --angel-gradient-guild-c: linear-gradient(120deg,
+        #0596da77,
+        #00000000,
+        #00000000,
+        #03ff1041,
+        #3beb3b);
+        --angel-guild-perm-pill: #014080;
+
+    color-scheme: dark;
+  }
+
+  /* Light theme override */
+  :root[data-theme="light"] {
+    --bg-main: radial-gradient(circle at top,
+        #ffefdd,
+        #ffe2f1 45%,
+        #f8cee3 100%);
+    --bg-panel: #ffeef7;
+    --bg-soft: rgba(255, 249, 242, 0.9);
+    --accent: #ffb347;
+    --accent-soft: #ff9ad5;
+    --text-main: #3d2c4d;
+    --text-muted: #2c2430;
+
+    --btn-bg-primary: #f9a8d4;
+    --btn-bg-primary-hover: #fb7185;
+    --btn-text-primary: #3b2b4a;
+
+    --btn-border-primary: #ff9ad5;
+    --btn-border-soft: rgba(255, 154, 213, 0.4);
+
+    --btn-gradient-border: linear-gradient(120deg, #ffb347, #ff9ad5, #a855f7);
+    --btn-shadow: 0 0 20px rgba(255, 154, 213, 0.3);
+
+    --angel-gradient: linear-gradient(120deg,
+        #f97316,
+        #ec4899,
+        #6366f1);
+    --angel-gradient-soft: linear-gradient(120deg,
+        #ffb347,
+        #ff9ad5,
+        #a855f7,
+        #ffb347);
+    --angel-gradient-guild-o: linear-gradient(120deg,
+        #f58bffbe,
+        #00000000,
+        #00000000,
+        #eeff0357,
+        #dfeb3b);
+    --angel-gradient-guild-a: linear-gradient(120deg,
+        #f58bffbe,
+        #00000000,
+        #00000000,
+        #0314ff57,
+        #3b4deb);
+    --angel-gradient-guild-c: linear-gradient(120deg,
+        #f58bffbe,
+        #00000000,
+        #00000000,
+        #03ff1041,
+        #3beb3b);
+        --angel-guild-perm-pill: #af80b1;
+
+    color-scheme: light;
+  }
+
+  /* GLOBAL RESET */
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html,
+  body,
+  #root {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg-main);
+    color: var(--text-main);
+    transition:
+      background 0.25s ease,
+      color 0.25s ease;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
 }
 
-:root[data-theme="dark"] {
-  --bg-main: #050716;
-  --bg-panel: #0b111f;
-  --bg-soft: rgba(12, 18, 34, 0.9);
-  --accent: #8fd5ff;
-  --accent-soft: #bfe5ff;
-  --text-main: #dbe9ff;
-  color-scheme: dark;
-}
-
-/* Light pastel theme */
-:root[data-theme="light"] {
-  --bg-main: #fff9f2;
-  /* warm off-white */
-  --bg-panel: #ffeef7;
-  /* soft pink panel */
-  --bg-soft: rgba(255, 249, 242, 0.9);
-  --accent: #ffb347;
-  /* soft yellow/orange */
-  --accent-soft: #ff9ad5;
-  /* pastel pink */
-  --text-main: #3b2b4a;
-  /* gentle purple-brown */
-  color-scheme: light;
-}
-
-/* ==== GLOBAL RESET ==== */
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  background: var(--bg-main);
-  color: var(--text-main);
-}
-
-/* ==== ANIMATIONS ==== */
+/* ==== GLOBAL KEYFRAMES (ANIMATIONS) ====
+   (extra ones; Tailwind-driven ones like float / gradient-x
+   are defined in tailwind.config.js)
+*/
 
 @keyframes bubble-pop {
   0% {
@@ -103,49 +221,7 @@ body {
   }
 }
 
-/* ==== CATEGORY COLORS (Commands page) ==== */
-
-.category-General {
-  color: #8fd5ff;
-}
-
-.category-Utility {
-  color: #7df4c8;
-}
-
-.category-Fun {
-  color: #ffb8f1;
-}
-
-.category-Moderation {
-  color: #ff9b9b;
-}
-
-.category-Management {
-  color: #d8b4ff;
-}
-
-.category-Music {
-  color: #ffd27f;
-}
-
-.category-Security {
-  color: #f77676;
-}
-
-.category-Information {
-  color: #98c8ff;
-}
-
-.category-Developer {
-  color: #b1a8ff;
-}
-
-.category-Owenr {
-  color: #ffc37c;
-}
-
-
+/* animated gradient for legacy / non-tailwind pieces */
 @keyframes angel-gradient {
   0% {
     background-position: 0% 50%;
@@ -158,26 +234,6 @@ body {
   100% {
     background-position: 0% 50%;
   }
-}
-
-/* Animated gradient title for AngelBot */
-.angel-gradient-text {
-  background-image: linear-gradient(120deg,
-      var(--accent-soft),
-      #ff9ad5,
-      #ffd27f,
-      var(--accent-soft));
-  background-size: 200% 200%;
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  animation: angel-gradient 8s ease-in-out infinite;
-}
-
-@keyframes angel-gradient-move {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
 }
 
 @keyframes angel-pulse {
@@ -204,35 +260,120 @@ body {
 
 /* Login glow pulse */
 @keyframes login-glow {
-  0%, 100% { opacity: 0.4; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.15); }
-}
 
-.angel-button-label {
-  transition: background 0.35s ease, color 0.35s ease;
-}
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
 
-/* On button hover, make the label text gradient like the header */
-.angel-button:hover .angel-button-label {
-  background-image: linear-gradient(120deg,
-      var(--accent-soft),
-      #ff9ad5,
-      #ffd27f,
-      var(--accent-soft));
-  background-size: 200% 200%;
-  background-position: 50% 50%;
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
+  50% {
+    opacity: 0.8;
+    transform: scale(1.15);
+  }
 }
 
 @keyframes angel-card-pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 0.25;
     transform: scale(1);
   }
+
   50% {
     opacity: 0.6;
     transform: scale(1.03);
+  }
+}
+
+/* ==== COMPONENTS (UI CLASSES) ==== */
+
+
+@layer components {
+
+  /* CATEGORY COLORS (Commands page) */
+  .category-General {
+    color: #8fd5ff;
+  }
+
+  .category-Utility {
+    color: #7df4c8;
+  }
+
+  .category-Fun {
+    color: #ffb8f1;
+  }
+
+  .category-Moderation {
+    color: #ff9b9b;
+  }
+
+  .category-Management {
+    color: #d8b4ff;
+  }
+
+  .category-Music {
+    color: #ffd27f;
+  }
+
+  .category-Security {
+    color: #f77676;
+  }
+
+  .category-Information {
+    color: #98c8ff;
+  }
+
+  .category-Developer {
+    color: #b1a8ff;
+  }
+
+  .category-Owenr {
+    /* if typo, rename in JSX too */
+    color: #ffc37c;
+  }
+}
+
+
+/* ==== UTILITIES (OPTIONAL EXTRA CLASSES) ==== */
+
+@layer utilities {
+
+  /* Use this where you want the card pulse animation (on top of Tailwind utilities) */
+  .animate-angel-card-pulse {
+    animation: angel-card-pulse 2s ease-in-out infinite;
+  }
+
+  /* Small helper for subtle highlight border */
+  .angel-border-soft {
+    border: 1px solid var(--angel-border-soft);
+  }
+
+  /* Primary outline */
+  .outline-primary {
+    outline: 2px solid var(--btn-border-primary);
+    outline-offset: 3px;
+  }
+
+  /* Soft subtle outline */
+  .outline-soft {
+    outline: 2px solid var(--btn-border-soft);
+    outline-offset: 3px;
+  }
+
+  /* Glow outline using the gradient border */
+  .outline-glow {
+    outline: 3px solid transparent;
+    outline-offset: 4px;
+    background-image: var(--btn-gradient-border);
+    background-clip: padding-box;
+  }
+  /* Text outline for future use*/
+  .text-outline-shadow {
+    -webkit-text-stroke: 1px rgba(0, 0, 0, 0.418);
+    text-shadow:
+      0 0 10px var(--accent-soft),
+      0 0 20px var(--accent-soft);
   }
 }

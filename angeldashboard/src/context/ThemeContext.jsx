@@ -5,7 +5,6 @@ const ThemeContext = createContext(null);
 export function ThemeProvider({ children }) {
     const [theme, setTheme] = useState("dark");
 
-    // Load on mount
     useEffect(() => {
         const stored = localStorage.getItem("angel-theme");
         const initial = stored === "light" || stored === "dark" ? stored : "dark";
@@ -13,7 +12,6 @@ export function ThemeProvider({ children }) {
         document.documentElement.dataset.theme = initial;
     }, []);
 
-    // Apply + persist
     useEffect(() => {
         document.documentElement.dataset.theme = theme;
         localStorage.setItem("angel-theme", theme);

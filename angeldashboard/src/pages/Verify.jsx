@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { callApiPost } from "../handlers/apiClientHandler";
+import { useStyles } from "../context/StyleContext.jsx";
 
 export default function Verify() {
+    const { styles, getButton, getGradientText } = useStyles();
+
     const [status, setStatus] = useState("idle"); // idle | loading | success | error
     const [message, setMessage] = useState("Preparing your verification...");
     const [details, setDetails] = useState(null);
@@ -60,7 +63,7 @@ export default function Verify() {
         try {
             const res = await callApiPost("/verify/user/server", {
                 guildId,
-                token
+                token,
             });
 
             if (!res.success) {
@@ -73,7 +76,7 @@ export default function Verify() {
             setStatus("success");
             setMessage(
                 data?.message ||
-                    "You have been verified for this server. You can now return to Discord."
+                "You have been verified for this server. You can now return to Discord."
             );
         } catch (err) {
             console.error(err);
@@ -89,74 +92,25 @@ export default function Verify() {
     const isSuccess = status === "success";
 
     return (
-        <main
-            className="
-                min-h-screen
-                flex items-center justify-center
-                px-4
-                bg-[radial-gradient(circle_at_top,#1b2238,#050716_60%,#02030a)]
-                text-text-main
-                relative
-            "
-        >
+        <main className={`${styles.layout.page} flex items-center justify-center px-4 relative`}>
             {/* soft glow behind card */}
-            <div
-                className="
-                    pointer-events-none
-                    absolute inset-0
-                    flex items-center justify-center
-                "
-            >
-                <div
-                    className="
-                        h-64 w-64
-                        rounded-full
-                        bg-[radial-gradient(circle,rgba(143,213,255,0.45),transparent_70%)]
-                        blur-3xl
-                        opacity-60
-                    "
-                />
-            </div>
 
             {/* Card */}
-            <section
-                className="
-                    relative z-10
-                    w-full max-w-md
-                    rounded-2xl
-                    border border-[rgba(135,206,255,0.35)]
-                    bg-bg-soft
-                    shadow-angel-soft
-                    px-6 py-7 md:px-8 md:py-8
-                    overflow-hidden
-                "
-            >
-                {/* top halo */}
-                <div
-                    className="
-                        pointer-events-none
-                        absolute -top-24 left-1/2
-                        h-56 w-56
-                        -translate-x-1/2
-                        rounded-full
-                        bg-[radial-gradient(circle,rgba(135,206,255,0.75),transparent_70%)]
-                        blur-[42px]
-                        opacity-70
-                    "
-                />
+            <section className={`${styles.layout.card} relative z-10 w-full max-w-md px-6 py-7 md:px-8 md:py-8 overflow-hidden`}>
 
+                {/* --- DEFAULT STATE: captcha --- */}
                 {!isSuccess && !isError && (
                     <>
                         <header className="relative z-10 mb-4">
                             <h1
-                                className="
-                                    text-xl md:text-2xl font-semibold mb-1
-                                    angel-gradient-text
-                                "
+                                className={getGradientText(
+                                    "title",
+                                    "text-xl md:text-2xl font-semibold mb-1 text-center"
+                                )}
                             >
                                 AngelBot Verification
                             </h1>
-                            <p className="text-sm md:text-[0.95rem] opacity-85">
+                            <p className={`${styles.text.base} text-sm md:text-[0.95rem] opacity-85`}>
                                 {message}
                             </p>
                         </header>
@@ -172,19 +126,7 @@ export default function Verify() {
                                 </span>
                                 <input
                                     type="text"
-                                    className="
-                                        flex-1
-                                        rounded-md
-                                        border border-[rgba(135,206,255,0.4)]
-                                        bg-[rgba(4,10,24,0.9)]
-                                        px-3 py-2
-                                        text-sm
-                                        text-text-main
-                                        placeholder:text-[rgba(219,233,255,0.6)]
-                                        focus:outline-none
-                                        focus:border-[rgba(135,206,255,0.9)]
-                                        focus:shadow-[0_0_8px_rgba(135,206,255,0.3)]
-                                    "
+                                    className={`${styles.search.input}`}
                                     value={captchaInput}
                                     onChange={(e) =>
                                         setCaptchaInput(e.target.value)
@@ -200,92 +142,64 @@ export default function Verify() {
                             )}
                         </div>
 
+                        {/* Verify button */}
                         <button
                             type="button"
                             onClick={handleVerifyClick}
                             disabled={isLoading}
-                            className={`
-                                relative z-10
-                                mt-2
-                                w-full
-                                rounded-xl
-                                bg-linear-to-r from-sky-300 to-purple-300
-                                px-4 py-2.5
-                                text-sm md:text-[0.95rem]
-                                font-semibold
-                                text-slate-900
-                                flex items-center justify-center gap-2
-                                shadow-[0_0_10px_rgba(135,206,255,0.3)]
-                                transition
-                                hover:brightness-110 hover:shadow-[0_0_16px_rgba(135,206,255,0.45)]
-                                disabled:opacity-60 disabled:cursor-not-allowed
-                            `}
+                            className={getButton(
+                                "primary",
+                                "md",
+                                "relative z-10 mt-2 w-full flex items-center justify-center gap-2"
+                            )}
                         >
                             <span>{isLoading ? "Verifying..." : "Verify me"}</span>
                         </button>
                     </>
                 )}
 
+                {/* --- SUCCESS --- */}
                 {isSuccess && (
                     <div className="relative z-10">
                         <h1 className="text-xl md:text-2xl font-semibold mb-2 text-emerald-300">
                             ✅ Verified
                         </h1>
-                        <p className="text-sm md:text-[0.95rem] opacity-85 mb-4">
+                        <p className={`${styles.text.base} text-sm md:text-[0.95rem] opacity-85 mb-4`}>
                             {message}
                         </p>
                         <a
                             href="https://discord.com/app"
-                            className="
-                                inline-block
-                                text-sm font-medium
-                                text-(--accent-soft)
-                                hover:underline
-                            "
+                            className={getButton(
+                                "primary",
+                                "md",
+                                "relative z-10 mt-2 w-full flex items-center justify-center gap-2"
+                            )}
                         >
                             Back to Discord
                         </a>
                     </div>
                 )}
 
+                {/* --- ERROR --- */}
                 {isError && (
                     <div className="relative z-10">
                         <h1 className="text-xl md:text-2xl font-semibold mb-2 text-[#ffb0b0]">
                             ❌ Verification Error
                         </h1>
-                        <p className="text-sm md:text-[0.95rem] opacity-85 mb-4">
+                        <p className={`${styles.text.base} text-sm md:text-[0.95rem] opacity-85 mb-4`}>
                             {message}
                         </p>
                         <a
                             href="https://discord.com/app"
-                            className="
-                                inline-block
-                                text-sm font-medium
-                                text-(--accent-soft)
-                                hover:underline
-                            "
+                            className={getButton(
+                                "primary",
+                                "md",
+                                "relative z-10 mt-2 w-full flex items-center justify-center gap-2"
+                            )}
                         >
                             Back to Discord
                         </a>
                     </div>
-                )}
-
-                {/* Debug (optional) */}
-                {details && (
-                    <pre
-                        className="
-                            relative z-10 mt-5
-                            max-h-40 overflow-auto
-                            rounded-md
-                            bg-[rgba(0,0,0,0.35)]
-                            border border-[rgba(135,206,255,0.35)]
-                            px-3 py-2
-                            text-[0.7rem]
-                            opacity-60
-                        "
-                    >
-                        {JSON.stringify(details, null, 2)}
-                    </pre>
                 )}
             </section>
         </main>
