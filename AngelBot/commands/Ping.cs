@@ -13,9 +13,10 @@ namespace AngelBot.Commands
             Description = "Ping pong with the latency!",
             Aliases = ["ping", "pong"],
             Color = new Color(255,255,128),
-            Scope = SlashScope.Global,
+            Scope = SlashScope.None,
             Category = CommandCategory.Developer,
-            UsageExamples = ["a!ping", "angel ping", "/ping"]
+            UsageExamples = ["a!ping", "angel ping", "/ping"],
+            VisibleInHelp = false
         }){ }
 
         public override async Task Run(SocketMessage message, DiscordSocketClient client, string usedPrefix, string usedCommandName, string[] args)

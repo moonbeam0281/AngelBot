@@ -265,6 +265,86 @@ export function StyleProvider({ children }) {
                 gradientX: "animate-gradient-x",
                 spinSlow: "animate-spin-slow",
             },
+
+            // COMMANDS
+            commands: {
+                // Outer gradient frame
+                cardOuter: [
+                    "group relative rounded-2xl p-px transition",
+                    "[background:linear-gradient(135deg,rgba(143,213,255,0.82),rgba(143,213,255,0.05),rgba(143,213,255,0.12))]"
+                ].join(" "),
+
+                // Inner panel
+                cardInner: [
+                    "relative z-10",
+                    "rounded-2xl",
+                    "border border-[rgba(255,255,255,0.05)]",
+                    "p-4",
+                    "shadow-[0_9px_22px_rgba(15,23,42,0.9)]",
+                    "backdrop-blur-md",
+                    "transition-all",
+                    "overflow-hidden",
+                    "group-hover:-translate-y-1.5",
+                    "bg-[var(--bg-panel)]"
+                ].join(" "),
+
+                // Shine sweep
+                shine: [
+                    "pointer-events-none",
+                    "absolute inset-0",
+                    "opacity-0 group-hover:opacity-100",
+                    "-translate-x-[120%] group-hover:translate-x-[120%]",
+                    "bg-gradient-to-r from-transparent via-white/10 to-transparent",
+                    "transition-all duration-900"
+                ].join(" "),
+
+                // Header
+                headerTitle: "m-0 text-[1.25rem] font-semibold tracking-wide",
+                headerDescription: "mt-1 mb-0 text-[0.9rem] opacity-80",
+
+                // Scope pill
+                scopeBase: [
+                    "self-start rounded-full px-3 py-1",
+                    "text-[0.75rem] font-semibold uppercase",
+                    "bg-[var(--bg-soft)]",
+                    "border",
+                    "backdrop-blur"
+                ].join(" "),
+
+                scopeGlobal: "text-(--anegl-guild-scope-globaltext) border-(--angel-guild-scope-globalborder)",
+                scopeGuild: "text-(--anegl-guild-scope-guildtext) border-(--angel-guild-scope-guildborder)",
+                scopeDefault: "text-[var(--accent-soft)] border-[var(--angel-border-soft)]",
+
+                // Aliases / usage
+                aliasesLabel: "min-w-[70px] font-semibold opacity-85",
+                aliasPill: [
+                    "rounded-full px-2 py-0.5",
+                    "text-[0.8rem]",
+                    "bg-[var(--bg-panel)]",
+                    "border border-[rgba(135,206,255,0.3)]",
+                    "backdrop-blur-sm"
+                ].join(" "),
+
+                usagePill: [
+                    "inline-block rounded-md",
+                    "bg-[var(--bg-panel)]",
+                    "border border-[rgba(135,206,255,0.35)]",
+                    "px-3 py-1",
+                    "text-[0.8rem]",
+                    "backdrop-blur-sm"
+                ].join(" "),
+
+                // Footer
+                footerRow: "mt-3 flex items-center justify-between text-[0.8rem] opacity-90",
+                hiddenBadge: [
+                    "rounded-full px-2 py-0.5",
+                    "bg-[rgba(80,20,36,0.9)]",
+                    "border border-[rgba(255,155,155,0.7)]",
+                    "text-[#ffb0b0]",
+                    "text-[0.75rem] font-semibold uppercase"
+                ].join(" "),
+            },
+
         };
     }, [theme]);
 

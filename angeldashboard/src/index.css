@@ -90,7 +90,11 @@
         #00000000,
         #03ff1041,
         #3beb3b);
-        --angel-guild-perm-pill: #014080;
+    --angel-guild-perm-pill: #014080;
+    --anegl-guild-scope-globaltext: #a4f4cf;
+    --angel-guild-scope-globalborder: #27d1a4;
+    --anegl-guild-scope-guildtext: #735cd8;
+    --angel-guild-scope-guildborder: #2f00b1;
 
     color-scheme: dark;
   }
@@ -145,7 +149,11 @@
         #00000000,
         #03ff1041,
         #3beb3b);
-        --angel-guild-perm-pill: #af80b1;
+    --angel-guild-perm-pill: #af80b1;
+    --anegl-guild-scope-globaltext: #129900;
+    --angel-guild-scope-globalborder: #27d160;
+    --anegl-guild-scope-guildtext: #937aff;
+    --angel-guild-scope-guildborder: #5427d1;
 
     color-scheme: light;
   }
@@ -295,43 +303,71 @@
   /* CATEGORY COLORS (Commands page) */
   .category-General {
     color: #8fd5ff;
+    border-color: rgba(143, 213, 255, 0.45);
+    background-color: rgba(143, 213, 255, 0.12);
   }
 
   .category-Utility {
     color: #7df4c8;
+    border-color: rgba(125, 244, 200, 0.45);
+    background-color: rgba(125, 244, 200, 0.12);
   }
 
   .category-Fun {
     color: #ffb8f1;
+    border-color: rgba(255, 184, 241, 0.4);
+    background-color: rgba(255, 184, 241, 0.12);
   }
 
   .category-Moderation {
     color: #ff9b9b;
+    border-color: rgba(255, 155, 155, 0.45);
+    background-color: rgba(255, 155, 155, 0.12);
   }
 
   .category-Management {
     color: #d8b4ff;
+    border-color: rgba(216, 180, 255, 0.45);
+    background-color: rgba(216, 180, 255, 0.12);
   }
 
   .category-Music {
     color: #ffd27f;
+    border-color: rgba(255, 210, 127, 0.45);
+    background-color: rgba(255, 210, 127, 0.12);
   }
 
   .category-Security {
     color: #f77676;
+    border-color: rgba(247, 118, 118, 0.45);
+    background-color: rgba(247, 118, 118, 0.12);
   }
 
   .category-Information {
     color: #98c8ff;
+    border-color: rgba(152, 200, 255, 0.45);
+    background-color: rgba(152, 200, 255, 0.12);
   }
 
   .category-Developer {
     color: #b1a8ff;
+    border-color: rgba(177, 168, 255, 0.45);
+    background-color: rgba(177, 168, 255, 0.12);
   }
 
-  .category-Owenr {
-    /* if typo, rename in JSX too */
+  .category-Owner {
     color: #ffc37c;
+    border-color: rgba(255, 195, 124, 0.45);
+    background-color: rgba(255, 195, 124, 0.12);
+  }
+
+
+  .cmd-pill {
+    @apply px-2 py-0.5 rounded-full text-[0.75rem] font-semibold uppercase;
+    @apply backdrop-blur-sm border;
+    background-color: var(--bg-soft);
+    border-color: var(--angel-border-soft);
+    box-shadow: 0 0 4px currentColor;
   }
 }
 
@@ -369,6 +405,7 @@
     background-image: var(--btn-gradient-border);
     background-clip: padding-box;
   }
+
   /* Text outline for future use*/
   .text-outline-shadow {
     -webkit-text-stroke: 1px rgba(0, 0, 0, 0.418);
