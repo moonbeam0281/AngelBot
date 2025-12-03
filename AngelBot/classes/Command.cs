@@ -38,6 +38,17 @@ namespace AngelBot.Classes
             return builder;
         }
 
+        public virtual bool IsAdminOrGuildOwner(SocketGuildUser user, SocketGuild guild)
+            => user.Id == guild.OwnerId || user.GuildPermissions.Administrator;
+
+        public virtual bool IsDevOrOwner(SocketUser user)
+        {
+            if(user.Id.ToString() == Environment.GetEnvironmentVariable("OWNER_ID")) return true;
+            //TODO: Create command for OwnerOnly
+            //to be created to check database and also create a owner only command
+            return true;
+        }
+
         public abstract Task Run(SocketMessage message, DiscordSocketClient client, string usedPrefix, string usedCommandName, string[] args);
 
         public abstract Task Run(SocketSlashCommand interaction, DiscordSocketClient client);

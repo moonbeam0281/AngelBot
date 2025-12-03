@@ -16,13 +16,14 @@ namespace AngelBot.Commands
             Aliases = ["verify"],
             Color = new Color(255, 255, 128),
             Scope = SlashScope.Guild,
-            Category = CommandCategory.Moderation,
+            Category = CommandCategory.Security,
             UsageExamples = [
                 "angel verify channel #verify-here",
                 "angel verify role @Verified",
                 "angel verify toggle",
                 "/verify"
-            ]
+            ],
+            UsageScopes = [UsageScope.Admin, UsageScope.CommonUser]
         })
         { }
 
@@ -43,7 +44,7 @@ namespace AngelBot.Commands
             }
 
             // Only owner or admins can configure verification
-            if (user.Id != guild.OwnerId && !user.GuildPermissions.Administrator)
+            if (!IsAdminOrGuildOwner(user, guild))
             {
                 await message.Channel.SendMessageAsync("Only the server owner or admins can configure verification.");
                 return;

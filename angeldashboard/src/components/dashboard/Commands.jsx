@@ -8,12 +8,10 @@ const CATEGORY_ENUM = [
     "Utility",
     "Fun",
     "Moderation",
-    "Management",
     "Music",
     "Security",
     "Information",
-    "Developer",
-    "Owenr"
+    "Developer"
 ];
 
 export default function Commands() {

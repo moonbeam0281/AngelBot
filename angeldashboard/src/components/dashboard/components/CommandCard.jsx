@@ -11,6 +11,7 @@ export default function CommandCard({ command }) {
         aliases = [],
         usageExamples = [],
         visibleInHelp,
+        usageScopes,
     } = command;
 
     const normalizedScope = String(scope ?? "").toLowerCase();
@@ -103,12 +104,20 @@ export default function CommandCard({ command }) {
                         {category}
                     </span>
 
-                    {!visibleInHelp && (
-                        <span className={styles.commands.hiddenBadge}>
-                            Hidden
-                        </span>
-                    )}
+                    <div className="flex gap-2 items-center">
+                        Useable by: 
+                        {usageScopes.map(s => (
+                            <span key={s} className={styles.commands.usagePill}>
+                                {s}
+                            </span>
+                        ))}
+                    </div>
                 </div>
+                {!visibleInHelp && (
+                    <span className={styles.commands.hiddenTab}>
+                        HIDDEN
+                    </span>
+                )}
             </div>
         </div>
     );

@@ -22,9 +22,13 @@ namespace AngelBot.Interfaces
 
         // Whether to show in help command
         public bool VisibleInHelp { get; init; } = true;
+        //Usage scope for users
+        public UsageScope[] UsageScopes { get; set; } = [UsageScope.CommonUser];
     }
 
     public enum SlashScope { None, Global, Guild }
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum UsageScope { Owner, Admin, Developer, CommonUser }
 
-    public enum CommandCategory { General, Utility, Fun, Moderation, Management, Music, Security, Information, Developer, Owenr }
+    public enum CommandCategory { General, Utility, Fun, Moderation, Music, Security, Information, Developer }
 }

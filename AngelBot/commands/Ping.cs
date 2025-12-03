@@ -16,7 +16,8 @@ namespace AngelBot.Commands
             Scope = SlashScope.None,
             Category = CommandCategory.Developer,
             UsageExamples = ["a!ping", "angel ping", "/ping"],
-            VisibleInHelp = false
+            VisibleInHelp = false,
+            UsageScopes = [UsageScope.Owner, UsageScope.Developer]
         }){ }
 
         public override async Task Run(SocketMessage message, DiscordSocketClient client, string usedPrefix, string usedCommandName, string[] args)

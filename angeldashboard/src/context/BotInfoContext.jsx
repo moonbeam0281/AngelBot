@@ -25,8 +25,8 @@ export function BotInfoProvider({ children }) {
                             scope: cmd.scope ?? cmd.Scope ?? "Global",
                             aliases: cmd.aliases ?? cmd.Aliases ?? [],
                             usageExamples: cmd.usageExamples ?? cmd.UsageExamples ?? [],
-                            visibleInHelp:
-                                cmd.visibleInHelp ?? cmd.VisibleInHelp ?? true,
+                            visibleInHelp: cmd.visibleInHelp ?? cmd.VisibleInHelp ?? true,
+                            usageScopes: cmd.usageScopes ?? cmd.UsageScopes ?? ["CommonUser"],
                         }));
 
                         setBotInfo({

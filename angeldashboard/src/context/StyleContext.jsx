@@ -336,12 +336,26 @@ export function StyleProvider({ children }) {
 
                 // Footer
                 footerRow: "mt-3 flex items-center justify-between text-[0.8rem] opacity-90",
-                hiddenBadge: [
-                    "rounded-full px-2 py-0.5",
+                hiddenTab: [
+                    "absolute",
+                    "left-1/2",
+                    "-translate-x-1/2",
+                    "px-3 py-0.2",
+                    "rounded-t-xl",
+                    "text-[0.70rem]",
+                    "font-semibold",
+                    "backdrop-blur-sm",
                     "bg-[rgba(80,20,36,0.9)]",
                     "border border-[rgba(255,155,155,0.7)]",
                     "text-[#ffb0b0]",
-                    "text-[0.75rem] font-semibold uppercase"
+                ].join(" "),
+                usagePill: [
+                    "px-2 py-0.5 rounded-full text-[0.70rem] font-semibold uppercase",
+                    "border border-[var(--angel-border-soft)]",
+                    "bg-[var(--bg-soft)]",
+                    "text-[var(--text-main)]",
+                    "backdrop-blur-sm",
+                    "shadow-sm"
                 ].join(" "),
             },
 
