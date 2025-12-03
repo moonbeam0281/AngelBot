@@ -27,6 +27,17 @@ namespace AngelBot.Commands
         })
         { }
 
+        public override async Task<bool> IsSlashAvailableAsync(ulong guildId)
+        {
+            var cfg = await VerificationHandler.Instance.GetGuildConfigAsync(guildId);
+
+            if (cfg is null) return false;
+            if (!cfg.Enabled) return false;
+            if (!cfg.VerificationChannelId.HasValue || !cfg.VerificationRoleId.HasValue) return false;
+
+            return true;
+        }
+
         public override async Task Run(SocketMessage message, DiscordSocketClient client, string usedPrefix, string usedCommandName, string[] args)
         {
             if (message.Channel is not SocketGuildChannel guildChannel)
@@ -92,15 +103,15 @@ namespace AngelBot.Commands
             switch (sub)
             {
                 case "channel":
-                    await HandleSetChannel(message, guildChannel, guild, args);
+                    await HandleSetChannel(message, guild, client, guildChannel, args);
                     break;
 
                 case "role":
-                    await HandleSetRole(message, guild, args);
+                    await HandleSetRole(message, guild, client, args);
                     break;
 
                 case "toggle":
-                    await HandleToggle(message, guild);
+                    await HandleToggle(message, guild, client);
                     break;
 
                 default:
@@ -114,9 +125,13 @@ namespace AngelBot.Commands
                     );
                     break;
             }
+
         }
 
-        private async Task HandleSetChannel(SocketMessage message, SocketGuildChannel currentChannel, SocketGuild guild, string[] args)
+        private static bool ShouldHaveVerifySlash(VerificationConfig? cfg)
+            => cfg is { Enabled: true } && cfg.VerificationChannelId.HasValue && cfg.VerificationRoleId.HasValue;
+
+        private async Task HandleSetChannel(SocketMessage message, SocketGuild guild, DiscordSocketClient client, SocketGuildChannel currentChannel, string[] args)
         {
             var channel = currentChannel as SocketTextChannel;
 
@@ -157,10 +172,14 @@ namespace AngelBot.Commands
                 existing?.Enabled ?? true
             );
 
+            var shouldExist = ShouldHaveVerifySlash(existing);
+
+            await DiscordEventHandler.UpdateSlashCommandAsync(client, this, guild, shouldExist);
+
             await message.Channel.SendMessageAsync($"Verification channel set to {channel.Mention}.");
         }
 
-        private async Task HandleSetRole(SocketMessage message, SocketGuild guild, string[] args)
+        private async Task HandleSetRole(SocketMessage message, SocketGuild guild, DiscordSocketClient client, string[] args)
         {
             if (args.Length < 2)
             {
@@ -194,10 +213,14 @@ namespace AngelBot.Commands
                 existing?.Enabled ?? true
             );
 
+            var shouldExist = ShouldHaveVerifySlash(existing);
+
+            await DiscordEventHandler.UpdateSlashCommandAsync(client, this, guild, shouldExist);
+
             await message.Channel.SendMessageAsync($"Verification role set to {role.Mention}.");
         }
 
-        private async Task HandleToggle(SocketMessage message, SocketGuild guild)
+        private async Task HandleToggle(SocketMessage message, SocketGuild guild, DiscordSocketClient client)
         {
             var existing = await VerificationHandler.Instance.GetGuildConfigAsync(guild.Id);
 
@@ -209,6 +232,10 @@ namespace AngelBot.Commands
                 existing?.VerificationRoleId,
                 newEnabled
             );
+
+            var shouldExist = ShouldHaveVerifySlash(existing);
+
+            await DiscordEventHandler.UpdateSlashCommandAsync(client, this, guild, shouldExist);
 
             await message.Channel.SendMessageAsync(
                 $"Verification is now {(newEnabled ? "✅ **enabled**" : "❌ **disabled**")}."

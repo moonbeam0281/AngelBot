@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { callApiPost } from "../handlers/apiClientHandler";
+import { callApiPost, callApiGet } from "../handlers/apiClientHandler";
 import { useStyles } from "../context/StyleContext.jsx";
 
 export default function Verify() {
@@ -31,13 +31,62 @@ export default function Verify() {
         setGuildId(g);
         setToken(t);
         setDetails({ guildId: g, token: t });
-        setMessage("Solve the captcha below to complete your verification.");
 
-        const a = Math.floor(Math.random() * 9) + 1;
-        const b = Math.floor(Math.random() * 9) + 1;
-        setCaptchaA(a);
-        setCaptchaB(b);
+        setStatus("loading");
+        setMessage("Checking your verification link…");
+
+        const checkToken = async () => {
+            try {
+                const route = `/verify/token?guildId=${encodeURIComponent(g)}&token=${encodeURIComponent(t)}`;
+
+                const res = await callApiGet(route);
+
+                if (!res.success) {
+                    setStatus("error");
+                    setMessage(res.error || "Could not validate verification link.");
+                    return;
+                }
+
+                const payload = res.data;
+
+                if (!payload?.success) {
+                    const errText = (payload?.error || "").toLowerCase();
+
+                    if (errText === "expired") {
+                        setStatus("error");
+                        setMessage(
+                            "This verification link has expired. Please request a new one from the server."
+                        );
+                    } else {
+                        setStatus("error");
+                        setMessage(
+                            payload?.error ||
+                            "This verification link is invalid or no longer active."
+                        );
+                    }
+                    return;
+                }
+
+                // ✅ token is valid → prepare captcha
+                const a = Math.floor(Math.random() * 9) + 1;
+                const b = Math.floor(Math.random() * 9) + 1;
+                setCaptchaA(a);
+                setCaptchaB(b);
+
+                setStatus("idle");
+                setMessage("Solve the captcha below to complete your verification.");
+            } catch (err) {
+                console.error(err);
+                setStatus("error");
+                setMessage(
+                    "Could not contact the verification server. Please try again later."
+                );
+            }
+        };
+
+        checkToken();
     }, []);
+
 
     const handleVerifyClick = async () => {
         if (!guildId || !token) return;

@@ -50,7 +50,7 @@ namespace AngelBot.Handlers
             return tokens.Where(t => !string.IsNullOrWhiteSpace(t)).ToArray();
         }
 
-        public static IEnumerable<T> ClearByCondition<T>(this IEnumerable<T> list, Func<T, T, bool> condition) where T : class
+        public static IEnumerable<T> ClearDupsByCondition<T>(this IEnumerable<T> list, Func<T, T, bool> condition) where T : class
         {
             var ilist = new List<T>();
 

@@ -12,7 +12,11 @@ namespace AngelBot.Handlers
 
         public static VerificationHandler Instance { get; } = new VerificationHandler();
 
-        private VerificationHandler() { }
+        private VerificationHandler()
+        {
+            //Cleanup function runs every 3 minutes
+            //_ = new Timer(_ => CleanupExpired(), null, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(5));
+        }
 
         private static string GenerateToken(int byteLength = 16)
         {
@@ -64,7 +68,7 @@ namespace AngelBot.Handlers
                 ChannelId = channelId,
                 RoleId = config?.VerificationRoleId,
                 CreatedAt = DateTimeOffset.UtcNow,
-                ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(15)
+                ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(5)
             };
 
             _sessions[token] = session;
@@ -98,13 +102,21 @@ namespace AngelBot.Handlers
 
         public void CleanupExpired()
         {
-            var now = DateTimeOffset.UtcNow;
-            foreach (var kv in _sessions)
+            try
             {
-                if (kv.Value.ExpiresAt <= now)
+                var now = DateTimeOffset.UtcNow;
+                foreach (var kv in _sessions)
                 {
-                    _sessions.TryRemove(kv.Key, out _);
+                    if (kv.Value.ExpiresAt <= now)
+                    {
+                        _sessions.TryRemove(kv.Key, out _);
+                        Console.WriteLine($"Cleaned up verify session: {kv}");
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Clean up for Verify session error:\n{e}");
             }
         }
     }

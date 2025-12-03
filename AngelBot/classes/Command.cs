@@ -27,6 +27,10 @@ namespace AngelBot.Classes
 
             return eb;
         }
+
+        public virtual Task<bool> IsSlashAvailableAsync(ulong guildId)
+            => Task.FromResult(false);
+
         public virtual SlashCommandBuilder BuildSlash()
         {
             var builder = new SlashCommandBuilder()

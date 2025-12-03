@@ -10,6 +10,7 @@ namespace AngelBot.Handlers
         private readonly DiscordSocketClient _mainClient;
         public readonly List<LogMessage> OutputLog = [];
         internal readonly object OutputLogLock = new();
+        private CancellationTokenSource _cts = new();
         public static ICommand[] CommandList = [];
         private readonly List<string> basePrefixes =
         [
@@ -50,7 +51,22 @@ namespace AngelBot.Handlers
 
             await Log(new LogMessage(LogSeverity.Info, "Ready", $"Logged in as {_mainClient.CurrentUser} | prefixes: {string.Join(", ", basePrefixes)}"));
 
+            _ = Task.Run(() => VerifySessionCleanup(_cts.Token));
+
             await Task.CompletedTask;
+        }
+
+        private async Task VerifySessionCleanup(CancellationToken token)
+        {
+            while(!token.IsCancellationRequested)
+            {
+                try
+                {
+                    VerificationHandler.Instance.CleanupExpired();
+                }
+                catch{}
+                await Task.Delay(TimeSpan.FromMinutes(5), token);
+            }
         }
 
         private async Task LoadCommands()
@@ -89,12 +105,32 @@ namespace AngelBot.Handlers
             CommandList = [.. newList];
         }
 
-        private SlashCommandProperties[] GetProperties(SlashScope scope) => [.. CommandList.OfType<Command>().Where(c => c.Info.Scope == scope).Select(c => c.BuildSlash()).Where(b => b is not null).Select(b => b.Build())];
+        private static SlashCommandProperties[] GetProperties(SlashScope scope) => [.. CommandList.OfType<Command>().Where(c => c.Info.Scope == scope).Select(c => c.BuildSlash()).Where(b => b is not null).Select(b => b.Build())];
+
+        private static async Task<SlashCommandProperties[]> GetGuildPropertiesAsync(ulong guildId)
+        {
+            var builders = new List<SlashCommandBuilder>();
+
+            var guildCommands = CommandList
+                .OfType<Command>()
+                .Where(c => c.Info.Scope == SlashScope.Guild);
+
+            foreach (var cmd in guildCommands)
+            {
+                if (!await cmd.IsSlashAvailableAsync(guildId))
+                    continue;
+
+                var b = cmd.BuildSlash();
+                if (b is not null)
+                    builders.Add(b);
+            }
+
+            return builders.Select(b => b.Build()).ToArray();
+        }
 
         private async Task LoadSlashCommands()
         {
             var globalProps = GetProperties(SlashScope.Global);
-            var guildProps = GetProperties(SlashScope.Guild);
 
             try
             {
@@ -102,6 +138,8 @@ namespace AngelBot.Handlers
                 foreach (var x in globalProps) await Log(new LogMessage(LogSeverity.Info, "SlashCommand", $"Registered {x.Name} to global slash commands"));
                 foreach (var guild in _mainClient.Guilds)
                 {
+                    var guildProps = await GetGuildPropertiesAsync(guild.Id);
+
                     await _mainClient.Rest.BulkOverwriteGuildCommands(guildProps, guild.Id);
                     await Log(new LogMessage(LogSeverity.Info, $"SlashGuild", $"Registered {guildProps.Length} commands in guild {guild.Name} ({guild.Id})"));
                 }
@@ -112,6 +150,50 @@ namespace AngelBot.Handlers
                 await Log(new LogMessage(LogSeverity.Error, "Error", $"Error while loading slash commands\n{e}"));
             }
         }
+
+        public static async Task UpdateSlashCommandAsync(DiscordSocketClient client, Command cmd, SocketGuild guild, bool shouldExist)
+        {
+            var appCommands = await client.Rest.GetGuildApplicationCommands(guild.Id);
+            var name = cmd.Info.Name.ToLowerInvariant();
+
+            var existing = appCommands.FirstOrDefault(c =>
+                string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase));
+
+            if (!shouldExist)
+            {
+                // If it already exists, nothing to do
+                if (existing != null)
+                    return;
+
+                // Otherwise create just this one slash
+                var builder = cmd.BuildSlash();
+                await client.Rest.CreateGuildCommand(builder.Build(), guild.Id);
+
+                var log = new LogMessage(
+                    LogSeverity.Info,
+                    "SlashGuild",
+                    $"Created /{name} in guild {guild.Name} ({guild.Id})");
+
+                Console.WriteLine(log);
+            }
+            else
+            {
+                // We want it gone
+                if (existing == null)
+                    return;
+
+                await existing.DeleteAsync();
+
+                var log = new LogMessage(
+                    LogSeverity.Info,
+                    "SlashGuild",
+                    $"Deleted /{name} from guild {guild.Name} ({guild.Id})"
+                );
+
+                Console.WriteLine(log);
+            }
+        }
+
 
         //Event tasks below
 

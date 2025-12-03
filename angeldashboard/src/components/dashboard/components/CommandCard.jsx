@@ -60,6 +60,8 @@ export default function CommandCard({ command }) {
                     )}
                 </div>
 
+                <hr className="mt-2.5 opacity-65" />
+
                 {/* Aliases */}
                 {aliases.length > 0 && (
                     <div className="mt-3 flex items-start gap-2 text-[0.85rem]">
@@ -97,6 +99,8 @@ export default function CommandCard({ command }) {
                         </div>
                     </div>
                 )}
+
+                <hr className="mt-2.5 opacity-65" />
 
                 {/* Footer */}
                 <div className={styles.commands.footerRow}>

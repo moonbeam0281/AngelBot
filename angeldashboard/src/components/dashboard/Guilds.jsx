@@ -74,8 +74,6 @@ export default function Guilds() {
                 </div>
             </div>
 
-            <hr className="border-0 h-px bg-transparent shadow-[0_7px_9px_rgba(0,0,0,0.35)]" />
-
             {/* List */}
             <div className="flex flex-wrap gap-3">
                 {filtered.map((g) => (

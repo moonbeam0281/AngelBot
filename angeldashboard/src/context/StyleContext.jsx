@@ -280,12 +280,10 @@ export function StyleProvider({ children }) {
                     "rounded-2xl",
                     "border border-[rgba(255,255,255,0.05)]",
                     "p-4",
-                    "shadow-[0_9px_22px_rgba(15,23,42,0.9)]",
-                    "backdrop-blur-md",
                     "transition-all",
                     "overflow-hidden",
                     "group-hover:-translate-y-1.5",
-                    "bg-[var(--bg-panel)]"
+                    "bg-(--bg-panel)",
                 ].join(" "),
 
                 // Shine sweep
@@ -307,8 +305,7 @@ export function StyleProvider({ children }) {
                     "self-start rounded-full px-3 py-1",
                     "text-[0.75rem] font-semibold uppercase",
                     "bg-[var(--bg-soft)]",
-                    "border",
-                    "backdrop-blur"
+                    "border"
                 ].join(" "),
 
                 scopeGlobal: "text-(--anegl-guild-scope-globaltext) border-(--angel-guild-scope-globalborder)",
@@ -316,22 +313,11 @@ export function StyleProvider({ children }) {
                 scopeDefault: "text-[var(--accent-soft)] border-[var(--angel-border-soft)]",
 
                 // Aliases / usage
-                aliasesLabel: "min-w-[70px] font-semibold opacity-85",
+                aliasesLabel: "min-w-[70px] font-semibold",
                 aliasPill: [
-                    "rounded-full px-2 py-0.5",
-                    "text-[0.8rem]",
-                    "bg-[var(--bg-panel)]",
-                    "border border-[rgba(135,206,255,0.3)]",
-                    "backdrop-blur-sm"
-                ].join(" "),
-
-                usagePill: [
-                    "inline-block rounded-md",
-                    "bg-[var(--bg-panel)]",
-                    "border border-[rgba(135,206,255,0.35)]",
-                    "px-3 py-1",
-                    "text-[0.8rem]",
-                    "backdrop-blur-sm"
+                    "rounded-full px-3 py-1 font-semibold",
+                    "bg-(--bg-soft)",
+                    "border border-(--angel-border-soft)"
                 ].join(" "),
 
                 // Footer
@@ -344,18 +330,15 @@ export function StyleProvider({ children }) {
                     "rounded-t-xl",
                     "text-[0.70rem]",
                     "font-semibold",
-                    "backdrop-blur-sm",
                     "bg-[rgba(80,20,36,0.9)]",
                     "border border-[rgba(255,155,155,0.7)]",
                     "text-[#ffb0b0]",
                 ].join(" "),
                 usagePill: [
-                    "px-2 py-0.5 rounded-full text-[0.70rem] font-semibold uppercase",
-                    "border border-[var(--angel-border-soft)]",
-                    "bg-[var(--bg-soft)]",
-                    "text-[var(--text-main)]",
-                    "backdrop-blur-sm",
-                    "shadow-sm"
+                    "px-3 py-1 rounded-full font-semibold",
+                    "border border-(--angel-border-soft)",
+                    "bg-(--bg-soft)",
+                    "text-(--text-main)"
                 ].join(" "),
             },
 

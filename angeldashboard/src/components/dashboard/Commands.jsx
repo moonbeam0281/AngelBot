@@ -101,8 +101,6 @@ export default function Commands() {
                 </div>
             </div>
 
-            <hr className="border-0 h-px bg-transparent shadow-[0_7px_9px_rgba(0,0,0,0.35)]" />
-
             {/* Command list */}
             <div className="flex flex-col gap-2">
                 {filtered.map((cmd, idx) => (
