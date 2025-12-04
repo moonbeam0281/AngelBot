@@ -8,7 +8,7 @@ namespace AngelBot.Handlers
     public class DiscordEventHandler
     {
         private readonly DiscordSocketClient _mainClient;
-        public readonly List<LogMessage> OutputLog = [];
+        public static readonly List<LogMessage> OutputLog = [];
         internal readonly object OutputLogLock = new();
         private CancellationTokenSource _cts = new();
         public static ICommand[] CommandList = [];
@@ -31,7 +31,6 @@ namespace AngelBot.Handlers
             client.ReactionAdded += ReactionAdded;
 
             client.AutocompleteExecuted += AutocompleteExecuted;
-
 
         }
 
@@ -58,13 +57,13 @@ namespace AngelBot.Handlers
 
         private async Task VerifySessionCleanup(CancellationToken token)
         {
-            while(!token.IsCancellationRequested)
+            while (!token.IsCancellationRequested)
             {
                 try
                 {
                     VerificationHandler.Instance.CleanupExpired();
                 }
-                catch{}
+                catch { }
                 await Task.Delay(TimeSpan.FromMinutes(5), token);
             }
         }
@@ -227,6 +226,12 @@ namespace AngelBot.Handlers
 
                 if (match is null) return;
 
+                if (!await match.HasPermissionAsync(message, _mainClient))
+                {
+                    await message.Channel.SendMessageAsync("You don't have permission to use that command");
+                    return;
+                }
+
                 await match.Run(message, _mainClient, used, name, args);
                 await Log(new LogMessage(LogSeverity.Info, "CommandCall", $"Command {match.Info.Name} was called by {message.Author} in {message.Channel.Name}" + $"{(message.Channel as SocketGuildChannel)?.Guild.Name}"));
             }
@@ -251,6 +256,11 @@ namespace AngelBot.Handlers
                 }
                 else
                 {
+                    if (!await match.HasPermissionAsync(interaction, _mainClient))
+                    {
+                        await interaction.RespondAsync("You don't have permmission to use this command.", ephemeral: true);
+                        return;
+                    }
                     await match.Run(interaction, _mainClient);
                     await Log(new LogMessage(LogSeverity.Info, "SlashCall", $"Command {match.Info.Name} was called by {interaction.User} in {interaction.Channel.Name}" + $"{(interaction.Channel as SocketGuildChannel)?.Guild.Name}"));
                 }

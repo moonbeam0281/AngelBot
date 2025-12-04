@@ -10,7 +10,6 @@ export default function CommandCard({ command }) {
         scope,
         aliases = [],
         usageExamples = [],
-        visibleInHelp,
         usageScopes,
     } = command;
 
@@ -117,11 +116,6 @@ export default function CommandCard({ command }) {
                         ))}
                     </div>
                 </div>
-                {!visibleInHelp && (
-                    <span className={styles.commands.hiddenTab}>
-                        HIDDEN
-                    </span>
-                )}
             </div>
         </div>
     );

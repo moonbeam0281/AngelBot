@@ -322,18 +322,6 @@ export function StyleProvider({ children }) {
 
                 // Footer
                 footerRow: "mt-3 flex items-center justify-between text-[0.8rem] opacity-90",
-                hiddenTab: [
-                    "absolute",
-                    "left-1/2",
-                    "-translate-x-1/2",
-                    "px-3 py-0.2",
-                    "rounded-t-xl",
-                    "text-[0.70rem]",
-                    "font-semibold",
-                    "bg-[rgba(80,20,36,0.9)]",
-                    "border border-[rgba(255,155,155,0.7)]",
-                    "text-[#ffb0b0]",
-                ].join(" "),
                 usagePill: [
                     "px-3 py-1 rounded-full font-semibold",
                     "border border-(--angel-border-soft)",

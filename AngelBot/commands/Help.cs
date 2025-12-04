@@ -20,11 +20,9 @@ namespace AngelBot.Commands
         })
         { }
 
-        private async Task SendHelpEmbeds(IMessageChannel channel, SocketUser author, DiscordSocketClient client)
+        private async Task SendHelpEmbeds(IMessageChannel channel, SocketUser author, DiscordSocketClient client, SocketGuild guild)
         {
-            var commandList = DiscordEventHandler.CommandList
-                .Cast<Command>()
-                .Where(x => x.Info.VisibleInHelp).ToList();
+            var commandList = await GetVisibleCommandsForUserAsync(author, guild);
 
             var listingBuild = new ListingBuilder<Command>(commandList, (range, info) =>
             {
@@ -98,6 +96,47 @@ namespace AngelBot.Commands
             return e.Build();
         }
 
+        private async Task<List<Command>> GetVisibleCommandsForUserAsync(SocketUser user, SocketGuild? guild)
+        {
+            bool isOwner = IsBotOwner(user.Id.ToString());
+            bool isDev = await IsDeveloperAsync(user.Id);
+            bool isAdmin = false;
+
+            if (guild != null)
+            {
+                var gUser = guild.GetUser(user.Id);
+                if (gUser != null && IsAdminOrGuildOwner(gUser, guild))
+                    isAdmin = true;
+            }
+
+            var allCommands = DiscordEventHandler.CommandList.OfType<Command>().ToList();
+
+            if (isOwner || isDev)
+                return allCommands;
+
+            var result = new List<Command>();
+
+            foreach (var cmd in allCommands)
+            {
+                var scopes = cmd.Info.UsageScopes ?? Array.Empty<UsageScope>();
+                if (scopes.Length == 0)
+                    scopes = [UsageScope.CommonUser];
+
+                if (scopes.Contains(UsageScope.CommonUser))
+                {
+                    result.Add(cmd);
+                    continue;
+                }
+
+                if (isAdmin && scopes.Contains(UsageScope.Admin))
+                {
+                    result.Add(cmd);
+                    continue;
+                }
+            }
+
+            return result;
+        }
 
         public override async Task Run(SocketMessage message, DiscordSocketClient client, string usedPrefix, string usedCommandName, string[] args)
         {
@@ -117,13 +156,27 @@ namespace AngelBot.Commands
                     return;
                 }
 
+                if (!await cmd.HasPermissionAsync(message, client))
+                {
+                    await message.Channel.SendMessageAsync("You don't have permission to view this command.");
+                    return;
+                }
+
                 await SendSingleCommandHelp(message.Channel, cmd, client, message.Author);
+                return;
+            }
+
+            var guild = (message.Channel as SocketGuildChannel)?.Guild;
+
+            if (guild is null)
+            {
+                await message.Channel.SendMessageAsync("Can't use this command outside of a **server**.");
                 return;
             }
 
             // Otherwise show full list
             await message.Channel.SendMessageAsync("Listing my commands!");
-            await SendHelpEmbeds(message.Channel, message.Author, client);
+            await SendHelpEmbeds(message.Channel, message.Author, client, guild);
         }
 
         public override SlashCommandBuilder BuildSlash()
@@ -163,8 +216,17 @@ namespace AngelBot.Commands
                 return;
             }
 
+            SocketGuild? guild = null;
+            if (interaction.GuildId.HasValue)
+                guild = client.GetGuild(interaction.GuildId.Value);
+            if (guild is null)
+            {
+                await interaction.RespondAsync("Can't use this command outside of a **server**.");
+                return;
+            }
+
             await interaction.RespondAsync("Listing my commands!", ephemeral: false);
-            await SendHelpEmbeds(interaction.Channel, interaction.User, client);
+            await SendHelpEmbeds(interaction.Channel, interaction.User, client, guild);
         }
 
     }
