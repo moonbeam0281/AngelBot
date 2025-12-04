@@ -212,13 +212,24 @@ namespace AngelBot.Commands
                     return;
                 }
 
+                if (!await cmd.HasPermissionAsync(interaction, client))
+                {
+                    await interaction.RespondAsync(
+                        "You don't have permission to view this command.",
+                        ephemeral: true
+                    );
+                    return;
+                }
+
                 await interaction.RespondAsync(embed: BuildSingleHelpEmbed(cmd, client, interaction.User), ephemeral: true);
                 return;
             }
 
             SocketGuild? guild = null;
+
             if (interaction.GuildId.HasValue)
                 guild = client.GetGuild(interaction.GuildId.Value);
+
             if (guild is null)
             {
                 await interaction.RespondAsync("Can't use this command outside of a **server**.");
