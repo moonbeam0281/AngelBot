@@ -1,18 +1,17 @@
-const API_PORT = import.meta.env.VITE_BOT_API_PORT;
+const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-const DEFAULT_PORT = 5005;
-const DEFAULT_URL = `http://localhost:${DEFAULT_PORT}`;
+const DEFAULT_URL = `http://localhost:5005`;
 
 function resolveApiBase() {
-    if (API_PORT && !isNaN(Number(API_PORT))) {
-        return `http://localhost:${API_PORT}`.replace(/\/$/, "");
+    if (VITE_API_BASE_URL) {
+        return `${VITE_API_BASE_URL}`.replace(/\/$/, "");
     }
 
     return DEFAULT_URL;
 }
 
 export const CONFIG = {
-    API_BASE: resolveApiBase(),
+    VITE_API_BASE_URL: resolveApiBase(),
     DEBUG: import.meta.env.DEV ?? false,
     VERSION: "1.0.0"
 };

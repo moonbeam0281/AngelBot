@@ -1,15 +1,17 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import VeilBackground from "../components/landing/VeilBackground.jsx";
-import angelBotImage from "../assets/angelbot.png";
+//import angelBotImage from "../assets/angelbot.png";
 import { useStyles } from "../context/StyleContext.jsx";
 import { useTheme } from "../context/ThemeContext.jsx";
+import { useBotInfo } from "../context/BotInfoContext.jsx"
 
 
 export default function Landing() {
   const { isAuth, user, startDiscordLogin } = useAuth();
   const { styles, getGradientText, getButton } = useStyles();
   const { theme } = useTheme();
+  const { botInfo } = useBotInfo();
 
   const navigate = useNavigate();
 
@@ -51,7 +53,7 @@ export default function Landing() {
           <div className={styles.landingLogo.auraWhite} />
 
           <div className={`${styles.landingLogo.avatarContainer}${styles.landingLogo.sizes.lg}`}>
-            <img src={angelBotImage} alt={"AngelBot"} className="h-full w-full object-cover" />
+            <img src={botInfo?.avatar} alt={"AngelBot"} className="h-full w-full object-cover" />
           </div>
         </div>
 

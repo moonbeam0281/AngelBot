@@ -1,0 +1,49 @@
+services:
+  db:
+    image: postgres:16
+    container_name: angelbot-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: angelbot
+      POSTGRES_PASSWORD: devpassword
+      POSTGRES_DB: angelbot_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./AngelBot/database/postgres-data-dev:/var/lib/postgresql/data
+
+  backend:
+    image: mcr.microsoft.com/dotnet/sdk:9.0
+    container_name: angelbot-backend-dev
+    working_dir: /src
+    volumes:
+      - ./AngelBot:/src
+    env_file:
+      - ./AngelBot/.env.dev
+    depends_on:
+      - db
+    ports:
+      - "5005:5005"
+    # 👇 be SUPER explicit: show SDK info, then run your project
+    command: [
+      "bash", "-c",
+      "dotnet --info && dotnet watch run --project AngelBot.csproj"
+    ]
+    restart: unless-stopped
+
+  frontend:
+    image: node:20
+    container_name: angelbot-frontend-dev
+    working_dir: /app
+    volumes:
+      - ./angeldashboard:/app
+    environment:
+      - VITE_API_BASE_URL=http://localhost:5005
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    command: [
+      "sh", "-c",
+      "npm install && npm run dev -- --host 0.0.0.0 --port 5173"
+    ]

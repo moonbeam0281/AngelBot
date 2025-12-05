@@ -26,11 +26,16 @@ namespace AngelBot.Classes
 
         public virtual void ApplyCors(HttpListenerResponse response)
         {
-            response.Headers["Access-Control-Allow-Origin"] = "http://localhost:5173";
+            var appEnv = Environment.GetEnvironmentVariable("APP_ENV") ?? "Development";
+            var frontEndUrl = Environment.GetEnvironmentVariable("FRONT_END_URL")
+                               ?? (appEnv == "Production"
+                                    ? "http://localhost:8080"
+                                    : "http://localhost:5173");
+
+            response.Headers["Access-Control-Allow-Origin"] = frontEndUrl;
             response.Headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS";
             response.Headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization";
             response.Headers["Access-Control-Allow-Credentials"] = "true";
         }
-
     }
 }

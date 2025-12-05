@@ -28,9 +28,14 @@ namespace AngelBot.APIServices
                 Console.WriteLine($"[API] Registered {ep.Info.Method} {ep.Info.Path}");
             }
 
-            _ = int.TryParse(Environment.GetEnvironmentVariable("API_PORT"), out var port);
+            var portStr = Environment.GetEnvironmentVariable("API_PORT");
+            if (!int.TryParse(portStr, out var port) || port <= 0 || port > 65535)
+            {
+                port = 5005;
+                Console.WriteLine($"[API] API_PORT missing or invalid ('{portStr}'), defaulting to {port}.");
+            }
 
-            prefixPort = $"http://localhost:{port}/";
+            prefixPort = $"http://+:{port}/";
             listener.Prefixes.Add(prefixPort);
 
             Console.WriteLine($"[API] Added prefix: {prefixPort}");
@@ -68,6 +73,7 @@ namespace AngelBot.APIServices
         {
             var path = ctx.Request.Url?.AbsolutePath?.ToLowerInvariant() ?? "/";
             var method = ctx.Request.HttpMethod.ToUpperInvariant();
+
             if (path == "/favicon.ico")
             {
                 ctx.Response.StatusCode = 204;
@@ -77,9 +83,14 @@ namespace AngelBot.APIServices
 
             if (method == "OPTIONS")
             {
+                var appEnv = Environment.GetEnvironmentVariable("APP_ENV") ?? "Development";
+                var frontEndUrl = Environment.GetEnvironmentVariable("FRONT_END_URL")
+                                   ?? (appEnv == "Production"
+                                       ? "http://localhost:8080"
+                                       : "http://localhost:5173");
                 ctx.Response.StatusCode = 204;
 
-                ctx.Response.Headers["Access-Control-Allow-Origin"] = "http://localhost:5173";
+                ctx.Response.Headers["Access-Control-Allow-Origin"] = frontEndUrl;
                 ctx.Response.Headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS";
                 ctx.Response.Headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization";
                 ctx.Response.Headers["Access-Control-Allow-Credentials"] = "true";

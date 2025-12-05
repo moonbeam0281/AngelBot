@@ -1,6 +1,6 @@
 import CONFIG from "../config";
 
-const API_BASE = CONFIG.API_BASE.replace(/\/$/, "");
+const VITE_API_BASE_URL = CONFIG.VITE_API_BASE_URL.replace(/\/$/, "");
 
 function normalizeRoute(route) {
     return route.replace(/^\//, "");
@@ -10,7 +10,7 @@ export function callApiPost(route, body = {}, cred = false) {
     return new Promise(async (resolve, reject) => {
         try {
             const clean = normalizeRoute(route);
-            const url = `${API_BASE}/${clean}`;
+            const url = `${VITE_API_BASE_URL}/${clean}`;
 
             const res = await fetch(url, {
                 method: "POST",
@@ -48,7 +48,7 @@ export function callApiGet(route, cred = false) {
     return new Promise(async (resolve, reject) => {
         try {
             const clean = normalizeRoute(route);
-            const url = `${API_BASE}/${clean}`;
+            const url = `${VITE_API_BASE_URL}/${clean}`;
 
             const res = await fetch(url, {
                 method: "GET",

@@ -34,7 +34,7 @@ export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    const AUTH_API_BASE = CONFIG.API_BASE;
+    const AUTH_API_BASE = CONFIG.VITE_API_BASE_URL;
     const isAuth = !!user;
 
     useEffect(() => {

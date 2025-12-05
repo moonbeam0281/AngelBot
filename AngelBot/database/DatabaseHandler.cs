@@ -39,9 +39,6 @@ namespace AngelBot.Database
         /// </summary>
         public async Task ApplySchemasAsync()
         {
-            // We assume your repo has: /database/schemas/*.sql
-            // At runtime AppContext.BaseDirectory will be bin/Debug/...,
-            // so we look for a "database/schemas" folder relative to that.
             var baseDir = AppContext.BaseDirectory;
             var schemaDir = Path.Combine(baseDir, "database", "schemas");
 
@@ -77,6 +74,38 @@ namespace AngelBot.Database
             }
 
             Console.WriteLine("[DB] Schema apply complete.");
+        }
+
+        /// <summary>
+        /// Apply all .sql schema files under /database/schemas (if present).
+        /// Runs in filename order: 001_..., 002_..., etc.
+        /// Safer to call on every startup because it has mutliple attempts
+        /// without crashing the bot.
+        /// </summary>
+        public async Task ApplySchemasWithRetryAsync(int maxAttempts = 10, int delayMs = 3000)
+        {
+            for (int attempt = 1; attempt <= maxAttempts; attempt++)
+            {
+                try
+                {
+                    Console.WriteLine($"[DB] Applying schemas (attempt {attempt}/{maxAttempts})...");
+                    await ApplySchemasAsync();
+                    Console.WriteLine("[DB] Schema apply succeeded.");
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[DB] Schema apply failed (attempt {attempt}): {ex.Message}");
+
+                    if (attempt == maxAttempts)
+                    {
+                        Console.WriteLine("[DB] Giving up after max attempts.");
+                        throw;
+                    }
+
+                    await Task.Delay(delayMs);
+                }
+            }
         }
 
         public async Task<bool> CheckConnectionAsync()

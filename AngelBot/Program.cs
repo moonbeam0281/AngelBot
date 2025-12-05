@@ -4,7 +4,7 @@ using AngelBot.Handlers;
 using Discord;
 using Discord.WebSocket;
 using dotenv.net;
-
+using dotenv.net.Utilities;
 
 namespace AngelBot
 {
@@ -23,7 +23,11 @@ namespace AngelBot
         private static readonly DiscordSocketClient Client = new(Config);
         private static async Task Main()
         {
-            DotEnv.Load();
+            DotEnv.Load(new DotEnvOptions(
+                envFilePaths: [".env", ".env.dev", ".env.prod"],
+                ignoreExceptions: true,
+                overwriteExistingVars: false
+            ));
 
             var token = Environment.GetEnvironmentVariable("DISCORD_TOKEN");
 
@@ -36,7 +40,7 @@ namespace AngelBot
             await Client.LoginAsync(TokenType.Bot, token);
             var eventHandler = new DiscordEventHandler(Client);
             Console.WriteLine("[AngelBot] Starting database...");
-            await DatabaseHandler.Instance.ApplySchemasAsync();
+            await DatabaseHandler.Instance.ApplySchemasWithRetryAsync();
             Console.WriteLine("Starting up...");
             await Client.StartAsync();
             Console.WriteLine("Bot is running!");
